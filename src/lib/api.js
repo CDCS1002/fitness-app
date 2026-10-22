@@ -98,3 +98,35 @@ export async function createFood(food, measures = []) {
   }
   return getFood(created.id);
 }
+
+// ---------------------------------------------------------------------
+// Agua, pasos y actividad
+// ---------------------------------------------------------------------
+export async function getDailyLog(date) {
+  return check(await supabase.from('daily_logs').select('*').eq('day', date).maybeSingle());
+}
+
+export async function addWater(date, deltaMl) {
+  return Number(check(await supabase.rpc('add_water', { p_day: date, p_delta_ml: deltaMl })));
+}
+
+export async function setSteps(date, steps) {
+  const { data: { session } } = await supabase.auth.getSession();
+  return check(
+    await supabase.from('daily_logs')
+      .upsert({ user_id: session.user.id, day: date, steps }, { onConflict: 'user_id,day' })
+      .select().single(),
+  );
+}
+
+export async function activitiesFor(date) {
+  return check(await supabase.from('activities').select('*').eq('day', date).order('created_at'));
+}
+
+export async function addActivity(row) {
+  return check(await supabase.from('activities').insert(row).select().single());
+}
+
+export async function deleteActivity(id) {
+  check(await supabase.from('activities').delete().eq('id', id));
+}

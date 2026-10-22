@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
-import { entriesFor, getPlanFor, deleteEntry } from '../lib/api.js';
+import { entriesFor, getPlanFor, deleteEntry, getDailyLog, activitiesFor } from '../lib/api.js';
+import { ActivityCard, WaterCard, StepsCard } from '../components/DailyCards.jsx';
 import { sumRoundedPortions, describePortions } from '../lib/portions.js';
 import { addDays, labelFor, today } from '../lib/dates.js';
 import { PortionBoard } from '../components/PortionBoard.jsx';
@@ -15,14 +16,22 @@ export function Day({ groups, onSignOut }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [adding, setAdding] = useState(null); // código de comida
+  const [activities, setActivities] = useState([]);
+  const [waterMl, setWaterMl] = useState(0);
+  const [steps, setStepsValue] = useState(null);
 
   async function load() {
     setLoading(true);
     setError('');
     try {
-      const [e, p] = await Promise.all([entriesFor(date), getPlanFor(date)]);
+      const [e, p, log, acts] = await Promise.all([
+        entriesFor(date), getPlanFor(date), getDailyLog(date), activitiesFor(date),
+      ]);
       setEntries(e);
       setPlan(p);
+      setWaterMl(Number(log?.water_ml || 0));
+      setStepsValue(log?.steps ?? null);
+      setActivities(acts);
     } catch (err) {
       setError(err.message);
     }
@@ -93,6 +102,10 @@ export function Day({ groups, onSignOut }) {
             </section>
           );
         })}
+
+        <ActivityCard date={date} activities={activities} setActivities={setActivities} />
+        <WaterCard date={date} plan={plan} waterMl={waterMl} setWaterMl={setWaterMl} />
+        <StepsCard date={date} plan={plan} steps={steps} setStepsValue={setStepsValue} />
 
         <footer class="foot">
           {plan && <span class="muted">{plan.name} · desde {plan.start_date}</span>}
