@@ -1,11 +1,15 @@
 import { supabase } from './supabase.js';
 import { groupsFromRows, macrosFor, portionsFor } from './portions.js';
 
-// Plan vigente en el Sheet (Configuración) al iniciar la app.
+// Plan vigente (consulta del 13/10/2026). Solo se usa si la cuenta aún no tiene planes.
 export const DEFAULT_PLAN = {
-  name: 'Plan actual',
-  start_date: '2026-09-28',
-  targets: { proteina: 15, carbohidrato: 9, grasa: 3, lacteo: 2, vegetal: 3, fruta: 2 },
+  name: 'Plan 2',
+  start_date: '2026-10-13',
+  targets: { proteina: 16, carbohidrato: 9, grasa: 3, lacteo: 2, vegetal: 3, fruta: 2, azucar: 1 },
+  kcal_target: 2060,
+  protein_target: 158,
+  carbs_target: 212,
+  fat_target: 65,
 };
 
 const FOOD_COLS =
