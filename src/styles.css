@@ -162,3 +162,29 @@ legend { font-size: 13px; color: var(--muted); padding: 0 6px; }
 .chips.small button { font-size: 13px; padding: 6px 10px; }
 .chips button.on { border-color: var(--accent); color: var(--accent); }
 .hint { font-size: 13px; margin: 0; }
+
+/* ---------- Escáner ---------- */
+.scan-btn { color: var(--accent); flex: none; display: grid; place-items: center; }
+.viewfinder { position: relative; aspect-ratio: 4 / 3; background: #000; border-radius: var(--radius); overflow: hidden; margin-top: 12px; }
+.viewfinder video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.viewfinder .frame { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.viewfinder .frame span {
+  width: 78%; height: 42%; border: 2px solid rgb(255 255 255 / .9); border-radius: 12px;
+  box-shadow: 0 0 0 999px rgb(0 0 0 / .35);
+}
+.viewfinder.scanning .frame span::after {
+  content: ''; display: block; height: 2px; margin-top: 50%; background: var(--danger); opacity: .8;
+  animation: scanline 1.6s ease-in-out infinite alternate;
+}
+@keyframes scanline { from { transform: translateY(-40px); } to { transform: translateY(40px); } }
+.vf-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #fff; }
+.center { text-align: center; }
+.manual-code { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 16px; }
+.manual-code .btn { padding: 11px 16px; }
+.lookup { display: grid; place-items: center; align-content: center; gap: 12px; }
+.spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface-2); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.notice { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 12px; font-size: 14px; background: var(--surface); border: 1px solid var(--line); }
+.notice.ok { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+.notice.warn { border-color: color-mix(in srgb, var(--warn) 50%, transparent); }
+.notice img { width: 52px; height: 52px; object-fit: contain; border-radius: 8px; background: #fff; flex: none; }

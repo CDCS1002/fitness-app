@@ -130,3 +130,12 @@ export async function addActivity(row) {
 export async function deleteActivity(id) {
   check(await supabase.from('activities').delete().eq('id', id));
 }
+
+// ---------------------------------------------------------------------
+// Código de barras: primero tu base, luego Open Food Facts
+// ---------------------------------------------------------------------
+export async function findByBarcode(code) {
+  const { barcodeVariants } = await import('./off.js');
+  const rows = check(await supabase.from('foods').select('id').in('barcode', barcodeVariants(code)).limit(1));
+  return rows.length ? getFood(rows[0].id) : null;
+}

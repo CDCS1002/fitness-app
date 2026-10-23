@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { searchFoods, recentFoods, getFood, addEntry } from '../lib/api.js';
+import { searchFoods, recentFoods, getFood, addEntry, findByBarcode } from '../lib/api.js';
+import { fetchOFF, mapOFF } from '../lib/off.js';
+import { Scanner } from '../components/Scanner.jsx';
 import { macrosFor, portionsFor, describePortions } from '../lib/portions.js';
 import { NewFood } from './NewFood.jsx';
 import { MEALS } from '../lib/meals.js';
@@ -11,6 +13,43 @@ export function AddFood({ date, meal, groups, onClose, onAdded }) {
   const [step, setStep] = useState('search');
   const [food, setFood] = useState(null);
   const [query, setQuery] = useState('');
+  const [draft, setDraft] = useState(null); // { initial, source, notice } para NewFood
+  const [lookup, setLookup] = useState('');
+
+  async function onCode(code) {
+    setStep('lookup');
+    setLookup(code);
+    try {
+      const local = await findByBarcode(code);
+      if (local) { setFood(local); setStep('detail'); return; }
+      let product = null;
+      try { product = await fetchOFF(code); } catch { product = null; }
+      if (product) {
+        const m = mapOFF(product);
+        setDraft({
+          initial: m,
+          source: 'openfoodfacts',
+          notice: {
+            kind: m.complete ? 'ok' : 'warn',
+            image: m.image,
+            text: m.complete
+              ? 'Encontrado en Open Food Facts. Revisa los valores contra la etiqueta y el grupo antes de guardar.'
+              : 'Encontrado en Open Food Facts, pero le faltan datos nutricionales. Complétalos con la etiqueta.',
+          },
+        });
+      } else {
+        setDraft({
+          initial: { barcode: code },
+          source: 'etiqueta',
+          notice: { kind: 'warn', text: `El código ${code} no está en Open Food Facts. Agrégalo con los datos de la etiqueta.` },
+        });
+      }
+      setStep('new');
+    } catch (err) {
+      alert(err.message);
+      setStep('search');
+    }
+  }
 
   async function pick(f) {
     try {
@@ -25,14 +64,22 @@ export function AddFood({ date, meal, groups, onClose, onAdded }) {
     <div class="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div class="sheet" role="dialog" aria-modal="true">
         {step === 'search' && (
-          <Search query={query} setQuery={setQuery} onPick={pick} onNew={() => setStep('new')} onClose={onClose} />
+          <Search query={query} setQuery={setQuery} onPick={pick} onScan={() => setStep('scan')}
+            onNew={() => { setDraft({ initial: { name: query } }); setStep('new'); }} onClose={onClose} />
+        )}
+        {step === 'scan' && <Scanner onCode={onCode} onCancel={() => setStep('search')} />}
+        {step === 'lookup' && (
+          <div class="sheet-body lookup">
+            <div class="spinner" aria-hidden="true" />
+            <p>Buscando {lookup}…</p>
+          </div>
         )}
         {step === 'detail' && food && (
           <Detail food={food} date={date} meal={meal} groups={groups} onBack={() => setStep('search')} onAdded={onAdded} />
         )}
         {step === 'new' && (
           <NewFood
-            initialName={query}
+            {...(draft || {})}
             groups={groups}
             onBack={() => setStep('search')}
             onCreated={(f) => { setFood(f); setStep('detail'); }}
@@ -43,7 +90,7 @@ export function AddFood({ date, meal, groups, onClose, onAdded }) {
   );
 }
 
-function Search({ query, setQuery, onPick, onNew, onClose }) {
+function Search({ query, setQuery, onPick, onNew, onScan, onClose }) {
   const [results, setResults] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -79,6 +126,11 @@ function Search({ query, setQuery, onPick, onNew, onClose }) {
           value={query}
           onInput={(e) => setQuery(e.currentTarget.value)}
         />
+        <button class="icon-btn scan-btn" aria-label="Escanear código de barras" onClick={onScan}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 9v6M11 9v6M14 9v6M17 9v6" />
+          </svg>
+        </button>
         <button class="link" onClick={onClose}>Cerrar</button>
       </header>
       <div class="sheet-body">

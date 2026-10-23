@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
+    "barcode-detector": "^3.2.3",
     "preact": "^11.0.1"
   },
   "devDependencies": {

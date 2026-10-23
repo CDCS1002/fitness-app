@@ -14,6 +14,8 @@ supabase/migrations/0002_daily_activity.sql  agua, pasos y actividad
 supabase/seed/foods.json              alimentos iniciales (editar aquí)
 supabase/seed/0002_foods.sql          generado con `npm run seed`
 src/lib/portions.js                   motor de porciones
+src/lib/off.js                        Open Food Facts: búsqueda por código y conversión
+src/components/Scanner.jsx            cámara + lector de códigos (zxing-wasm, servido localmente)
 src/screens/                          Login, Día, Agregar, Nuevo alimento
 tests/                                pruebas del motor (`npm test`)
 ```
@@ -49,3 +51,11 @@ npm install
 npm test
 npm run dev
 ```
+
+## Escáner de código de barras
+
+1. Busca el código en tu base (`foods.barcode`, probando variantes UPC-A/EAN-13).
+2. Si no existe, consulta Open Food Facts y prellena el formulario (valores por 100 g, porción del empaque y grupo sugerido por categoría o macros).
+3. Si tampoco está ahí, abre el formulario con el código ya puesto para copiar la etiqueta.
+
+Lo que guardas queda en tu base, así que el siguiente escaneo del mismo producto es instantáneo.
