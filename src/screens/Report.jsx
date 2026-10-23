@@ -47,7 +47,7 @@ export function Report({ onBack }) {
       .then(([r, weightsAll, scans]) => {
         if (!alive) return;
         setRep(buildReport({
-          days: buildDays(r), plans: r.plans, from, to, exclude: today(),
+          days: buildDays({ ...r, scans }), plans: r.plans, from, to, exclude: today(),
           strength: r.strength, exercises: r.exercises, weightsAll, scans,
         }));
       })
@@ -182,7 +182,8 @@ function ReportBody({ rep, plan }) {
           <thead><tr><th>Indicador</th><th>Promedio</th><th>Meta</th><th>Dif.</th></tr></thead>
           <tbody>
             <tr><td>Kcal de entrenamiento</td><td>{nf(a.activeKcal)}</td><td>—</td><td>—</td></tr>
-            {a.totalKcal != null && <tr><td>Gasto total (reloj)</td><td>{nf(a.totalKcal)}</td><td>—</td><td>—</td></tr>}
+            {a.dayActive != null && <tr><td>Kcal activas del día</td><td>{nf(a.dayActive)}</td><td>—</td><td>—</td></tr>}
+            {a.totalKcal != null && <tr><td>Gasto total (basal + activas del día)</td><td>{nf(a.totalKcal)}</td><td>—</td><td>—</td></tr>}
             {a.balance != null && <tr><td>Balance (comido − gastado)</td><td>{sign(a.balance, 0)}</td><td>—</td><td>—</td></tr>}
             <tr><td>Pasos</td><td>{nf(a.steps)}</td><td>{nf(a.stepsTarget)}</td><td class={tone(a.stepsDiff, 500)}>{sign(a.stepsDiff, 0)}</td></tr>
             <tr><td>Sueño (h)</td><td>{nf(a.sleep, 1)}</td><td>{nf(a.sleepTarget, 1)}</td><td class={tone(a.sleepDiff)}>{sign(a.sleepDiff)}</td></tr>

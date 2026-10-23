@@ -33,7 +33,7 @@ export function Progress({ onSignOut }) {
       setWeights(w);
       setScans(s);
       setPlans(r.plans);
-      setWeeks(weeklySummary(buildDays(r), r.plans, from, to, to).filter((x) => x.daysLogged || x.weight != null || x.strengthSessions));
+      setWeeks(weeklySummary(buildDays({ ...r, scans: s }), r.plans, from, to, to).filter((x) => x.daysLogged || x.weight != null || x.strengthSessions));
     } catch (err) { setError(err.message); }
   }
   useEffect(() => { load(); }, []);

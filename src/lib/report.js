@@ -59,6 +59,7 @@ export function buildReport({ days, plans, from, to, exclude = null, strength = 
   const waterL = r(of((d) => (d.waterMl ?? 0) / 1000), 2);
   const activity = {
     activeKcal: r(of((d) => d.activeKcal ?? 0)),
+    dayActive: r(avg(isos.map((d) => days[d]?.dayActive).filter((x) => x != null))),
     totalKcal: r(avg(isos.map((d) => days[d]?.totalKcal).filter((x) => x != null))),
     balance: r(avg(logged.map((d) => d.balance).filter((x) => x != null))),
     balanceDays: logged.filter((d) => d.balance != null).length,

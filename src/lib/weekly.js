@@ -6,7 +6,7 @@
 import { addDays, fromISO, toISO } from './dates.js';
 import { sumRoundedPortions, GROUP_ORDER } from './portions.js';
 import { waterTarget } from './activity.js';
-import { expectedKg } from './energy.js';
+import { expectedKg, bmrFor } from './energy.js';
 
 export function weekStart(iso) {
   const d = fromISO(iso);
@@ -27,7 +27,7 @@ export function groupsOnTarget(portions, targets) {
  * Arma los días a partir de las tablas.
  * @returns {Record<string, object>} por fecha ISO
  */
-export function buildDays({ entries = [], legacy = [], logs = [], activities = [], strength = [], exercises = [], weights = [] }) {
+export function buildDays({ entries = [], legacy = [], logs = [], activities = [], strength = [], exercises = [], weights = [], scans = [] }) {
   const days = {};
   const day = (iso) => (days[iso] ||= { day: iso, entries: [], activeKcal: null, strengthVolume: 0, strengthSets: 0 });
   for (const e of entries) day(e.eaten_on).entries.push(e);
@@ -36,7 +36,7 @@ export function buildDays({ entries = [], legacy = [], logs = [], activities = [
     const d = Object.assign(day(l.day), { waterMl: Number(l.water_ml || 0), steps: l.steps });
     if (l.sleep_h != null) d.sleep = Number(l.sleep_h);
     if (l.energy != null) d.energy = Number(l.energy);
-    if (l.total_kcal != null) d.totalKcal = Number(l.total_kcal);
+    if (l.day_active_kcal != null) d.dayActive = Number(l.day_active_kcal);
   }
   for (const a of activities) {
     const d = day(a.day);
@@ -63,7 +63,13 @@ export function buildDays({ entries = [], legacy = [], logs = [], activities = [
     if (d.activeKcal == null && d.legacy?.active_kcal != null) d.activeKcal = Number(d.legacy.active_kcal);
     if (d.sleep == null && d.legacy?.sleep_h != null) d.sleep = Number(d.legacy.sleep_h);
     if (d.energy == null && d.legacy?.energy != null) d.energy = Number(d.legacy.energy);
-    // Balance del día: solo con comida y gasto total registrados
+    // Gasto total = basal del InBody vigente + activas del día del reloj
+    if (d.dayActive != null) {
+      d.outsideKcal = Math.max(0, d.dayActive - (d.activeKcal || 0));
+      const bmr = bmrFor(scans, d.day);
+      if (bmr != null) d.totalKcal = bmr + d.dayActive;
+    }
+    // Balance del día: solo con comida y gasto total
     if (d.food && d.totalKcal != null) d.balance = d.food.kcal - d.totalKcal;
   }
   return days;

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'preact/hooks';
-import { entriesFor, getPlanFor, deleteEntry, getFood, getDailyLog } from '../lib/api.js';
+import { entriesFor, getPlanFor, deleteEntry, getFood, getDailyLog, listInbody } from '../lib/api.js';
 import { WaterCard } from '../components/DailyCards.jsx';
 import { MedsCard } from '../components/MedsCard.jsx';
 import { DayHeader } from '../components/DayHeader.jsx';
 import { sumRoundedPortions, describePortions } from '../lib/portions.js';
 import { PortionBoard } from '../components/PortionBoard.jsx';
 import { KcalMeter } from '../components/KcalMeter.jsx';
-import { dayEnergy, balanceLabel } from '../lib/energy.js';
+import { dayEnergy, balanceLabel, bmrFor } from '../lib/energy.js';
 import { AddFood, Detail } from './AddFood.jsx';
 import { MEALS } from '../lib/meals.js';
 
@@ -21,7 +21,9 @@ export function Day({ groups, date, setDate }) {
   const [adding, setAdding] = useState(null); // código de comida
   const [editing, setEditing] = useState(null); // { entry, food }
   const [waterMl, setWaterMl] = useState(0);
-  const [totalKcal, setTotalKcal] = useState(null);
+  const [dayActive, setDayActive] = useState(null);
+  const [scans, setScans] = useState([]);
+  useEffect(() => { listInbody().then(setScans).catch(() => {}); }, []);
 
   async function load() {
     setLoading(true);
@@ -31,7 +33,7 @@ export function Day({ groups, date, setDate }) {
       setEntries(e);
       setPlan(p);
       setWaterMl(Number(log?.water_ml || 0));
-      setTotalKcal(log?.total_kcal != null ? Number(log.total_kcal) : null);
+      setDayActive(log?.day_active_kcal != null ? Number(log.day_active_kcal) : null);
     } catch (err) {
       setError(err.message);
     }
@@ -80,7 +82,7 @@ export function Day({ groups, date, setDate }) {
           plan={plan}
           onPlanChange={setPlan}
         />
-        {totalKcal != null && <BalanceLine eaten={sum('kcal')} total={totalKcal} />}
+        {dayActive != null && bmrFor(scans, date) != null && <BalanceLine eaten={sum('kcal')} dayActive={dayActive} bmr={bmrFor(scans, date)} />}
 
         <PortionBoard totals={totals} targets={plan?.targets} groups={groups} />
 
@@ -145,9 +147,9 @@ export function Day({ groups, date, setDate }) {
   );
 }
 
-/** Comido vs gastado (con el total del reloj registrado en Actividad). */
-function BalanceLine({ eaten, total }) {
-  const e = dayEnergy({ total, eaten });
+/** Comido vs gastado (basal del InBody + kcal activas del día registradas en Actividad). */
+function BalanceLine({ eaten, dayActive, bmr }) {
+  const e = dayEnergy({ dayActive, bmr, eaten });
   const fmt = (n) => new Intl.NumberFormat('es', { useGrouping: 'always' }).format(Math.abs(n));
   return (
     <p class="balance-line">

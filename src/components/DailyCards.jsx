@@ -117,61 +117,69 @@ function AddActivity({ date, onClose, onAdded }) {
 }
 
 /* --------------------------- Gasto del día --------------------------- */
-export function TotalKcalCard({ total, activities, onSave }) {
+export function DayEnergyCard({ dayActive, activities, bmr, onSave }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState('');
   const input = useRef(null);
   const workouts = activities.reduce((a, x) => a + Number(x.active_kcal || 0), 0);
-  const e = dayEnergy({ total, workouts });
+  const e = dayEnergy({ dayActive, workouts, bmr });
 
   useEffect(() => { if (editing) input.current?.focus(); }, [editing]);
 
   function start() {
-    setValue(total != null ? String(n0(total)) : '');
+    setValue(dayActive != null ? String(n0(dayActive)) : '');
     setEditing(true);
   }
 
   async function save(ev) {
     ev.preventDefault();
     try {
-      await onSave({ total_kcal: value === '' ? null : Math.max(0, Math.round(Number(value))) });
+      await onSave({ day_active_kcal: value === '' ? null : Math.max(0, Math.round(Number(value))) });
       setEditing(false);
     } catch (err) {
-      alert(err.message.includes('total_kcal') ? 'Ejecuta la migración 0014 para guardar el gasto total.' : err.message);
+      alert(err.message.includes('day_active_kcal') ? 'Ejecuta la migración 0014 para guardar este dato.' : err.message);
     }
   }
 
-  const pct = e.total ? Math.min(e.workouts / e.total, 1) : 0;
+  const parts = e.dayActive == null ? [] : [
+    { k: 'Reposo', sub: 'basal InBody', v: e.bmr, c: 'var(--surface-3, #5b6470)' },
+    { k: 'Fuera del entreno', v: e.outside, c: 'var(--accent)' },
+    { k: 'Entrenamiento', v: e.workouts, c: 'var(--warn)' },
+  ].filter((p) => p.v != null);
+  const sum = parts.reduce((a, p) => a + p.v, 0) || 1;
+
   return (
     <section class="card">
-      <header class="card-head"><h2>Gasto del día</h2><span class="muted">kcal totales del reloj</span></header>
+      <header class="card-head">
+        <h2>Gasto del día</h2>
+        {e.total != null && <span class="card-big">⚡ {int(e.total)} <small class="muted">kcal</small></span>}
+      </header>
       {editing ? (
         <form class="steps-edit" onSubmit={save}>
           <input ref={input} type="number" inputmode="numeric" min="0" value={value}
-            onInput={(ev) => setValue(ev.currentTarget.value)} placeholder="Kcal totales del día" />
+            onInput={(ev) => setValue(ev.currentTarget.value)} placeholder="Kcal activas del día" />
           <button class="btn primary">Guardar</button>
           <button type="button" class="link" onClick={() => setEditing(false)}>Cancelar</button>
         </form>
       ) : (
-        <button class="metric-row as-btn" onClick={start} aria-label="Editar gasto total">
-          <span class="metric">⚡ <b>{e.total != null ? int(e.total) : '—'}</b><span class="muted"> kcal totales</span></span>
+        <button class="metric-row as-btn" onClick={start} aria-label="Editar kcal activas del día">
+          <span class="metric">🔥 <b>{e.dayActive != null ? int(e.dayActive) : '—'}</b><span class="muted"> kcal activas del día</span></span>
           <span class="muted">✎</span>
         </button>
       )}
-      {e.total != null && (
+      {parts.length > 0 && (
         <>
           <div class="bar split" aria-hidden="true">
-            <span style={`width:${pct * 100}%;background:var(--warn)`} />
-            <span style={`width:${(1 - pct) * 100}%;background:var(--accent)`} />
+            {parts.map((p) => <span key={p.k} style={`width:${(p.v / sum) * 100}%;background:${p.c}`} />)}
           </div>
           <div class="split-legend">
-            <span><i style="background:var(--warn)" />Entrenamiento <b>{int(e.workouts)}</b></span>
-            <span><i style="background:var(--accent)" />Fuera del entreno <b>{int(e.outside)}</b></span>
+            {parts.map((p) => <span key={p.k}><i style={`background:${p.c}`} />{p.k} <b>{int(p.v)}</b></span>)}
           </div>
-          {e.inconsistent && <p class="error">Las kcal de tus actividades superan el total. Revisa el dato del reloj.</p>}
+          {e.bmr == null && <p class="muted hint">Registra un InBody con tasa metabólica basal para calcular el gasto total.</p>}
+          {e.inconsistent && <p class="error">Tus entrenamientos suman más que las kcal activas del día. Revisa el dato del reloj.</p>}
         </>
       )}
-      {e.total == null && <p class="muted hint">Regístralo al final del día con el total que marca el reloj; la app resta las kcal de tus entrenamientos.</p>}
+      {e.dayActive == null && <p class="muted hint">Al final del día, anota las kcal activas totales del reloj (anillo Moverse). La app resta tus entrenamientos y suma tu basal del InBody.</p>}
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
-import { getPlanFor, getDailyLog, activitiesFor, setDailyFields } from '../lib/api.js';
-import { ActivityCard, StepsCard, SleepCard, EnergyCard, TotalKcalCard } from '../components/DailyCards.jsx';
+import { getPlanFor, getDailyLog, activitiesFor, setDailyFields, listInbody } from '../lib/api.js';
+import { bmrFor } from '../lib/energy.js';
+import { ActivityCard, StepsCard, SleepCard, EnergyCard, DayEnergyCard } from '../components/DailyCards.jsx';
 import { DayHeader } from '../components/DayHeader.jsx';
 
 /** Pestaña Actividad: sueño, energía, sesiones del Apple Watch y pasos. */
@@ -8,7 +9,10 @@ export function Wellness({ date, setDate }) {
   const [plan, setPlan] = useState(null);
   const [log, setLog] = useState(null);
   const [activities, setActivities] = useState([]);
+  const [scans, setScans] = useState([]);
   const [error, setError] = useState('');
+
+  useEffect(() => { listInbody().then(setScans).catch(() => {}); }, []);
 
   useEffect(() => {
     let alive = true;
@@ -32,7 +36,7 @@ export function Wellness({ date, setDate }) {
         <SleepCard date={date} plan={plan} sleep={log?.sleep_h != null ? Number(log.sleep_h) : null} log={log} onSave={save} />
         <EnergyCard energy={log?.energy ?? null} onSave={save} />
         <ActivityCard date={date} activities={activities} setActivities={setActivities} />
-        <TotalKcalCard total={log?.total_kcal ?? null} activities={activities} onSave={save} />
+        <DayEnergyCard dayActive={log?.day_active_kcal ?? null} activities={activities} bmr={bmrFor(scans, date)} onSave={save} />
         <StepsCard date={date} plan={plan} steps={log?.steps ?? null}
           setStepsValue={(steps) => setLog((l) => ({ ...(l || {}), steps }))} />
       </main>
