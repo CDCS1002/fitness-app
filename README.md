@@ -77,3 +77,11 @@ Lo que guardas queda en tu base, así que el siguiente escaneo del mismo product
 ## Fuerza
 
 Misma lógica que la hoja Fuerza del Sheet: rango 6–10 reps (30–90 s en isométricos); si todas las series llegan al máximo se sube la carga (+5 kg tren inferior, +2,5 kg superior, core e isométricos), si alguna queda por debajo del mínimo se baja, y si no se mantiene. La marca es el 1RM estimado (Epley) con la mejor serie. `tests/strength.test.js` reproduce casos reales del Sheet.
+
+### Rutina flexible
+
+Cada rutina se identifica con su día habitual (campo `days` de cada ejercicio). En la pestaña Fuerza se puede
+elegir la rutina del día; la lista trae todos sus ejercicios por grupo muscular y el abdomen al final. La app
+deduce qué rutinas se hicieron cada día a partir de lo registrado (una sesión mixta cuenta para varias si tiene
+al menos 2 ejercicios exclusivos de cada una) y avisa qué rutina de la semana falta. La elección se guarda en el
+dispositivo; si se pierde, la rutina se deduce de los registros (`src/lib/routine.js`, `tests/routine.test.js`).

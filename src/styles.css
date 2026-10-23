@@ -377,3 +377,13 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 .recalc { display: grid; gap: 6px; margin-top: 18px; }
 .scale-trend { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; font-size: 14px; margin: 4px 0 6px; }
 .scale-trend .small { width: 100%; font-size: 12px; }
+
+/* ---------- Rutina flexible ---------- */
+.routine-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.routine-chips { margin: 4px 0 12px; }
+.routine-chips small { font-size: 11px; }
+.card.missing { display: grid; gap: 10px; border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); margin-top: 12px; }
+.card.missing div { display: grid; gap: 2px; }
+.card.missing .muted { font-size: 14px; }
+.card.missing .btn { padding: 11px 14px; }
+.small-tag { font-size: 11px !important; text-transform: uppercase; letter-spacing: .04em; }

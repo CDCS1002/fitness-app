@@ -1,13 +1,24 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { listExercises, strengthUpTo } from '../lib/api.js';
-import { analyze, plannedFor, fmtKg, ACTION_LABEL } from '../lib/strength.js';
-import { fromISO } from '../lib/dates.js';
+import { analyze, fmtKg, ACTION_LABEL } from '../lib/strength.js';
+import { addDays, fromISO } from '../lib/dates.js';
+import { weekStart } from '../lib/weekly.js';
 import { DayHeader } from '../components/DayHeader.jsx';
-import { ROUTINE, isoDow } from '../lib/routine.js';
+import { ROUTINES, DAY_NAMES, isoDow, routineName, exercisesForRoutine, routineForDay, missingThisWeek, isEveryDay } from '../lib/routine.js';
 import { LogSet, ExercisePicker } from '../components/StrengthSheets.jsx';
 
 const fmtSets = (ex, sets) => sets.map(Number).join(' / ') + (ex.measure === 'segundos' ? ' s' : '');
 const int = (n) => new Intl.NumberFormat('es', { useGrouping: 'always' }).format(Math.round(n || 0));
+
+// Rutina elegida a mano por día (comodidad de este dispositivo; si se pierde, la rutina
+// se deduce de los ejercicios registrados ese día).
+const choiceKey = (day) => `routine:${day}`;
+function readChoice(day) {
+  try { const v = localStorage.getItem(choiceKey(day)); return v == null ? null : Number(v); } catch { return null; }
+}
+function writeChoice(day, key) {
+  try { localStorage.setItem(choiceKey(day), String(key)); } catch { /* sin almacenamiento */ }
+}
 
 export function Strength({ date, setDate }) {
   const [exercises, setExercises] = useState([]);
@@ -17,6 +28,8 @@ export function Strength({ date, setDate }) {
   const [open, setOpen] = useState(null); // ejercicio abierto en la hoja de registro
   const [picking, setPicking] = useState(false);
   const [extra, setExtra] = useState([]); // ejercicios agregados a mano este día
+  const [choice, setChoice] = useState(() => readChoice(date));
+  const [picker, setPicker] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -28,7 +41,13 @@ export function Strength({ date, setDate }) {
     } catch (err) { setError(err.message); }
     setLoading(false);
   }
-  useEffect(() => { load(); setExtra([]); }, [date]);
+  useEffect(() => { load(); setExtra([]); setChoice(readChoice(date)); setPicker(false); }, [date]);
+
+  function choose(key) {
+    writeChoice(date, key);
+    setChoice(key);
+    setPicker(false);
+  }
 
   const dow = isoDow(fromISO(date));
   const byId = useMemo(() => Object.fromEntries(exercises.map((e) => [e.id, e])), [exercises]);
@@ -36,13 +55,25 @@ export function Strength({ date, setDate }) {
   const lastBefore = (exId) => entries.find((e) => e.exercise_id === exId && e.day < date) || null;
   const todayOf = (exId) => todays.find((e) => e.exercise_id === exId) || null;
 
-  // Orden: lo ya registrado hoy, luego lo planeado para el día, luego lo agregado a mano
+  const routine = routineForDay({ exercises, entries, day: date, dow, choice });
+  const isHabitual = routine === (dow <= 5 ? dow : 0);
+
+  // Rutinas que tocaban antes en la semana y no se hicieron
+  const weekDays = [];
+  for (let d = weekStart(date); d <= date; d = addDays(d, 1)) weekDays.push(d);
+  const choices = Object.fromEntries(weekDays.map((d) => [d, readChoice(d)]).filter(([, v]) => v));
+  const missing = exercises.length ? missingThisWeek({ exercises, entries, weekDays, todayDow: dow, choices }).filter((k) => k !== routine) : [];
+
+  // Orden: lo ya registrado hoy, la rutina elegida (abdomen al final), lo agregado a mano
   const list = [];
   const seen = new Set();
   const push = (ex) => { if (ex && !seen.has(ex.id)) { seen.add(ex.id); list.push(ex); } };
   [...todays].reverse().forEach((e) => push(byId[e.exercise_id]));
-  plannedFor(exercises, dow).forEach(push);
+  const planned = exercisesForRoutine(exercises, routine);
+  planned.filter((e) => !isEveryDay(e)).forEach(push);
   extra.forEach((id) => push(byId[id]));
+  planned.filter(isEveryDay).forEach(push);
+  const plannedLeft = planned.filter((e) => !todayOf(e.id)).length;
 
   const volume = todays.reduce((a, e) => {
     const ex = byId[e.exercise_id];
@@ -64,13 +95,38 @@ export function Strength({ date, setDate }) {
       <main class="content">
         {error && <p class="error">{error}</p>}
         <section class="card routine">
-          <span class="muted">Hoy toca</span>
-          <h2>{ROUTINE[dow]}</h2>
+          <div class="routine-head">
+            <span class="muted">{isHabitual ? 'Hoy toca' : `Rutina del día · en vez de ${routineName(dow <= 5 ? dow : 0).replace(' + abdomen', '').toLowerCase()}`}</span>
+            <button class="link" onClick={() => setPicker(!picker)}>{picker ? 'Cerrar' : 'Cambiar'}</button>
+          </div>
+          <h2>{routineName(routine)}</h2>
+          {picker && (
+            <div class="chips routine-chips" role="radiogroup" aria-label="Rutina del día">
+              {ROUTINES.map((r) => (
+                <button key={r.key} role="radio" aria-checked={routine === r.key} class={routine === r.key ? 'on' : ''} onClick={() => choose(r.key)}>
+                  {r.name}{r.key >= 1 && r.key <= 5 && <small class="muted"> · {DAY_NAMES[r.key].slice(0, 3).toLowerCase()}</small>}
+                </button>
+              ))}
+            </div>
+          )}
           <div class="routine-stats">
-            <span><b>{todays.length}</b> ejercicios</span>
+            <span><b>{todays.length}</b> hechos</span>
+            {plannedLeft > 0 && <span><b>{plannedLeft}</b> pendientes</span>}
             <span><b>{int(volume)}</b> kg de volumen</span>
           </div>
         </section>
+
+        {missing.length > 0 && (
+          <section class="card missing">
+            <div>
+              <b>Esta semana te falta</b>
+              <span class="muted">{missing.map((k) => `${routineName(k).replace(' + abdomen', '')} (${DAY_NAMES[k].toLowerCase()})`).join(' · ')}</span>
+            </div>
+            <button class="btn primary" onClick={() => choose(missing[0])}>
+              Hacer {ROUTINES.find((r) => r.key === missing[0]).name.split(' · ')[0].toLowerCase()} hoy
+            </button>
+          </section>
+        )}
 
         <section class="meal">
           <header><h2>Ejercicios</h2></header>
@@ -93,6 +149,7 @@ export function Strength({ date, setDate }) {
                   ) : (
                     <span class="muted">{ex.muscle} · sin registros</span>
                   )}
+                  {!cur && prev && <span class="muted small-tag">{ex.muscle}</span>}
                 </span>
                 <span class="entry-side">
                   {cur ? (
@@ -104,7 +161,9 @@ export function Strength({ date, setDate }) {
               </button>
             );
           })}
-          {!loading && list.length === 0 && <p class="empty muted">No hay ejercicios planeados para este día.</p>}
+          {!loading && list.length === 0 && (
+            <p class="empty muted">{routine === 0 ? 'Día de descanso. Si quieres entrenar, toca «Cambiar» y elige una rutina.' : 'No hay ejercicios en el catálogo para esta rutina.'}</p>
+          )}
           <button class="wide-btn" onClick={() => setPicking(true)}>+ Otro ejercicio</button>
         </section>
       </main>
