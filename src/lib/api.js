@@ -300,3 +300,49 @@ export async function recalcEntries(groups, onProgress = () => {}) {
   }
   return { total: entries.length, updated: changes.length };
 }
+
+// ---------------------------------------------------------------------
+// Medicamentos y suplementos
+// ---------------------------------------------------------------------
+export async function listMeds() {
+  return check(await supabase.from('meds').select('*').order('name'));
+}
+
+export async function saveMed(row) {
+  const { id, ...data } = row;
+  return check(
+    id
+      ? await supabase.from('meds').update(data).eq('id', id).select().single()
+      : await supabase.from('meds').insert(data).select().single(),
+  );
+}
+
+export async function medLogsFor(day) {
+  return check(await supabase.from('med_logs').select('*').eq('day', day).order('taken_at'));
+}
+
+export async function logMed(row) {
+  return check(await supabase.from('med_logs').insert(row).select().single());
+}
+
+export async function deleteMedLog(id) {
+  check(await supabase.from('med_logs').delete().eq('id', id));
+}
+
+/** Código de barras: tu catálogo → NIH (suplementos de EE. UU.) → Open Food Facts. */
+export async function lookupMedBarcode(code) {
+  const { barcodeVariants } = await import('./off.js');
+  const own = check(await supabase.from('meds').select('*').in('barcode', barcodeVariants(code)).limit(1));
+  if (own.length) return { med: own[0] };
+  const { fetchDsld, mapOffSupplement } = await import('./meds.js');
+  try {
+    const d = await fetchDsld(code);
+    if (d) return { draft: d };
+  } catch { /* sin conexión con el NIH: se sigue con Open Food Facts */ }
+  try {
+    const { fetchOFF } = await import('./off.js');
+    const p = await fetchOFF(code);
+    if (p) return { draft: mapOffSupplement(p, String(code)) };
+  } catch { /* sin conexión */ }
+  return { draft: null };
+}

@@ -22,6 +22,8 @@ supabase/migrations/0008_visit.sql           próxima cita y notas para la nutri
 supabase/migrations/0009_combined_engine.sql motor combinado, grupo azúcar y equivalencia de tu leche
 supabase/seed/0010_list_foods.sql            alimentos de la lista de la nutricionista (56 genéricos, 39 de marca)
 supabase/migrations/0011_plan_2.sql          Planes 1 (24/08) y 2 (13/10) y grasa/músculo de la báscula de casa
+supabase/migrations/0012_sleep_stages_meds.sql fases del sueño, medicamentos y suplementos
+src/lib/sleep.js · src/lib/meds.js    fases del sueño; medicamentos, tomas y escáner (NIH DSLD → Open Food Facts)
 src/lib/report.js                     reporte para la cita (misma estructura que la hoja Reporte cita)
 supabase/seed/0005_progress_import.sql       peso, InBody y Diario 13–21 oct del Sheet
 src/lib/weekly.js                     resumen semanal (misma lógica que la hoja Semanal)

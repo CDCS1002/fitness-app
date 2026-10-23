@@ -387,3 +387,34 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 .card.missing .muted { font-size: 14px; }
 .card.missing .btn { padding: 11px 14px; }
 .small-tag { font-size: 11px !important; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ---------- Fases del sueño ---------- */
+.stages { margin-top: 12px; }
+.stage-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 2px; }
+.stage-bar span { display: block; }
+.stage-legend { list-style: none; margin: 10px 0 4px; padding: 0; display: grid; gap: 6px; }
+.stage-legend li { display: grid; grid-template-columns: 12px 1fr auto 42px; gap: 8px; align-items: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+.stage-legend li .muted { text-align: right; }
+.stage-legend i, .stage-name i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.stages-edit { display: grid; gap: 8px; margin: 4px 0 10px; }
+.stage-row { display: grid; grid-template-columns: 1fr 64px 64px; gap: 8px; align-items: center; }
+.stage-name { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.stage-name small { font-size: 11px; }
+.stage-row input { text-align: center; padding: 9px 6px; }
+.stage-actions { display: flex; justify-content: space-between; align-items: center; }
+.stage-actions .btn { padding: 11px 16px; }
+
+/* ---------- Medicamentos y suplementos ---------- */
+.med-row { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); padding: 8px 0; }
+.card .med-row:last-of-type { border-bottom: 0; }
+.med-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 0; text-align: left; }
+.med-takes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 50%; }
+.take { border: 1px solid var(--line); background: var(--surface-2); border-radius: 99px; padding: 7px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.take.on { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: color-mix(in srgb, var(--accent) 50%, transparent); color: var(--accent); }
+.med-row.done .entry-name { color: var(--muted); }
+.ing-row { display: grid; grid-template-columns: 1fr 70px 56px auto; gap: 6px; align-items: center; margin-bottom: 6px; }
+.ing-row input { padding: 9px 8px; }
+.times { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.time-chip { display: inline-flex; align-items: center; gap: 4px; }
+.time-chip input { width: auto; padding: 8px; }
+.card-head .link { white-space: nowrap; flex: none; }

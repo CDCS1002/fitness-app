@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { addWater, setSteps, addActivity, deleteActivity } from '../lib/api.js';
+import { STAGES, hasStages, stagesSummary, stageFields, fmtMin } from '../lib/sleep.js';
 import { ACTIVITY_KINDS, kindOf, GLASS_ML, isTrainingDay, waterTarget } from '../lib/activity.js';
 
 const n0 = (x) => Math.round(Number(x) || 0);
@@ -209,45 +210,103 @@ const hm = (h) => {
   return `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, '0')} min`;
 };
 
-export function SleepCard({ date, plan, sleep, onSave }) {
+export function SleepCard({ date, plan, sleep, log, onSave }) {
   const target = Number(plan?.sleep_target || 8);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(null); // null | 'total' | 'fases'
   const [h, setH] = useState('');
   const [m, setM] = useState('');
+  const [st, setSt] = useState({});
+  const staged = hasStages(log);
+  const summary = stagesSummary(log);
 
-  function start() {
+  function start(mode) {
     const total = Math.round((Number(sleep) || 0) * 60);
     setH(sleep != null ? String(Math.floor(total / 60)) : '');
     setM(sleep != null ? String(total % 60) : '');
-    setEditing(true);
+    const init = {};
+    for (const s of STAGES) {
+      const v = log?.[s.key];
+      init[s.code] = v == null ? { h: '', m: '' } : { h: String(Math.floor(v / 60)), m: String(v % 60) };
+    }
+    setSt(init);
+    setEditing(mode);
   }
 
   async function save(e) {
     e.preventDefault();
-    const value = h === '' && m === '' ? null : Math.round(((Number(h) || 0) + (Number(m) || 0) / 60) * 100) / 100;
-    try { await onSave({ sleep_h: value }); setEditing(false); } catch (err) { alert(err.message); }
+    try {
+      if (editing === 'fases') {
+        await onSave(stageFields(st));
+      } else {
+        const value = h === '' && m === '' ? null : Math.round(((Number(h) || 0) + (Number(m) || 0) / 60) * 100) / 100;
+        await onSave({ sleep_h: value });
+      }
+      setEditing(null);
+    } catch (err) { alert(err.message); }
   }
 
+  const setStage = (code, k) => (e) => setSt({ ...st, [code]: { ...st[code], [k]: e.currentTarget.value } });
+  const preview = editing === 'fases' ? stagesSummary(stageFields(st)) : null;
   const pct = Math.min((sleep || 0) / target, 1);
   const state = sleep == null ? '' : sleep >= target ? 'done' : sleep >= target - 1 ? 'near' : 'low';
+
   return (
     <section class="card">
       <header class="card-head"><h2>Sueño</h2><span class="muted">anoche</span></header>
-      {editing ? (
+      {editing === 'total' && (
         <form class="sleep-edit" onSubmit={save}>
           <label>Horas<input type="number" inputmode="numeric" min="0" max="24" value={h} onInput={(e) => setH(e.currentTarget.value)} autoFocus /></label>
           <label>Minutos<input type="number" inputmode="numeric" min="0" max="59" value={m} onInput={(e) => setM(e.currentTarget.value)} /></label>
           <button class="btn primary">Guardar</button>
-          <button type="button" class="link" onClick={() => setEditing(false)}>Cancelar</button>
+          <button type="button" class="link" onClick={() => setEditing(null)}>Cancelar</button>
         </form>
-      ) : (
-        <button class="metric-row as-btn" onClick={start} aria-label="Editar sueño">
+      )}
+      {editing === 'fases' && (
+        <form class="stages-edit" onSubmit={save}>
+          <p class="muted hint">Copia el tiempo de cada fase de Salud → Sueño → Fases. El total dormido se calcula solo (REM + ligero + profundo).</p>
+          {STAGES.map((s) => (
+            <div class="stage-row" key={s.code}>
+              <span class="stage-name"><i style={`background:${s.color}`} />{s.label}<small class="muted"> {s.hint}</small></span>
+              <input type="number" inputmode="numeric" min="0" max="24" placeholder="h" aria-label={`${s.label}, horas`} value={st[s.code]?.h} onInput={setStage(s.code, 'h')} />
+              <input type="number" inputmode="numeric" min="0" max="59" placeholder="min" aria-label={`${s.label}, minutos`} value={st[s.code]?.m} onInput={setStage(s.code, 'm')} />
+            </div>
+          ))}
+          {preview.totalMin > 0 && <p class="muted hint">Dormido: <b>{fmtMin(preview.asleepMin)}</b> · {preview.items.map((i) => `${i.label} ${i.pct} %`).join(' · ')}</p>}
+          <div class="stage-actions">
+            <button type="button" class="link" onClick={() => setEditing(null)}>Cancelar</button>
+            <button class="btn primary">Guardar fases</button>
+          </div>
+        </form>
+      )}
+      {!editing && (
+        <button class="metric-row as-btn" onClick={() => start(staged ? 'fases' : 'total')} aria-label="Editar sueño">
           <span class="metric">🌙 <b>{sleep != null ? hm(sleep) : '—'}</b><span class="muted"> / {target} h</span></span>
           <span class="muted">✎</span>
         </button>
       )}
       <div class={`bar sleep ${state}`}><span style={`width:${pct * 100}%`} /></div>
-      <p class="muted hint">Copia el dato de Sueño del Apple Watch (tiempo dormido, no tiempo en cama).</p>
+
+      {!editing && staged && summary.totalMin > 0 && (
+        <div class="stages">
+          <div class="stage-bar" role="img" aria-label={summary.items.map((i) => `${i.label} ${i.pct} %`).join(', ')}>
+            {summary.items.filter((i) => i.min > 0).map((i) => <span key={i.code} style={`width:${(i.min / summary.totalMin) * 100}%;background:${i.color}`} />)}
+          </div>
+          <ul class="stage-legend">
+            {summary.items.map((i) => (
+              <li key={i.code}>
+                <i style={`background:${i.color}`} />
+                <span>{i.label}</span>
+                <b>{fmtMin(i.min)}</b>
+                <span class="muted">{i.pct} %</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {!editing && (
+        <button class="link" onClick={() => start('fases')}>{staged ? 'Editar fases del sueño' : '+ Agregar fases del sueño'}</button>
+      )}
+      {!editing && !staged && <p class="muted hint">Copia el dato de Sueño del Apple Watch (tiempo dormido, no tiempo en cama).</p>}
     </section>
   );
 }

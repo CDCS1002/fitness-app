@@ -29,7 +29,7 @@ export function Wellness({ date, setDate }) {
       <DayHeader date={date} setDate={setDate} title="Actividad" />
       <main class="content">
         {error && <p class="error">{error}</p>}
-        <SleepCard date={date} plan={plan} sleep={log?.sleep_h != null ? Number(log.sleep_h) : null} onSave={save} />
+        <SleepCard date={date} plan={plan} sleep={log?.sleep_h != null ? Number(log.sleep_h) : null} log={log} onSave={save} />
         <EnergyCard energy={log?.energy ?? null} onSave={save} />
         <ActivityCard date={date} activities={activities} setActivities={setActivities} />
         <StepsCard date={date} plan={plan} steps={log?.steps ?? null}

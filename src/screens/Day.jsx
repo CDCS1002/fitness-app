@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { entriesFor, getPlanFor, deleteEntry, getFood, getDailyLog } from '../lib/api.js';
 import { WaterCard } from '../components/DailyCards.jsx';
+import { MedsCard } from '../components/MedsCard.jsx';
 import { DayHeader } from '../components/DayHeader.jsx';
 import { sumRoundedPortions, describePortions } from '../lib/portions.js';
 import { PortionBoard } from '../components/PortionBoard.jsx';
@@ -107,6 +108,7 @@ export function Day({ groups, date, setDate }) {
         })}
 
         <WaterCard date={date} plan={plan} waterMl={waterMl} setWaterMl={setWaterMl} />
+        <MedsCard date={date} />
       </main>
 
       {editing && (
