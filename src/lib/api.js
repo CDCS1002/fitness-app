@@ -59,8 +59,8 @@ export async function getFood(id) {
   return { ...food, measures };
 }
 
-/** Arma y guarda un registro con la foto de macros y porciones. */
-export async function addEntry({ food, date, meal, measure, quantity, groups }) {
+/** Arma un registro con la foto de macros y porciones del momento. */
+function buildEntry({ food, date, meal, measure, quantity, groups }) {
   const grams = (measure ? Number(measure.grams) : 1) * quantity;
   const m = macrosFor(food, grams);
   const portions = portionsFor(food, grams, groups);
@@ -81,8 +81,18 @@ export async function addEntry({ food, date, meal, measure, quantity, groups }) 
     fiber: r2(m.fiber),
     portions: Object.fromEntries(Object.entries(portions).map(([k, v]) => [k, r2(v)])),
   };
-  return check(await supabase.from('meal_entries').insert(row).select().single());
+  return row;
 }
+
+export async function addEntry(args) {
+  return check(await supabase.from('meal_entries').insert(buildEntry(args)).select().single());
+}
+
+/** Recalcula un registro existente (cantidad, medida o tiempo de comida). */
+export async function updateEntry(id, args) {
+  return check(await supabase.from('meal_entries').update(buildEntry(args)).eq('id', id).select().single());
+}
+
 
 export async function deleteEntry(id) {
   check(await supabase.from('meal_entries').delete().eq('id', id));

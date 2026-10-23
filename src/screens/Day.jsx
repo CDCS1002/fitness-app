@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'preact/hooks';
-import { entriesFor, getPlanFor, deleteEntry, getDailyLog, activitiesFor } from '../lib/api.js';
+import { entriesFor, getPlanFor, deleteEntry, getFood, getDailyLog, activitiesFor } from '../lib/api.js';
 import { ActivityCard, WaterCard, StepsCard } from '../components/DailyCards.jsx';
 import { sumRoundedPortions, describePortions } from '../lib/portions.js';
 import { addDays, labelFor, today } from '../lib/dates.js';
 import { PortionBoard } from '../components/PortionBoard.jsx';
 import { KcalMeter } from '../components/KcalMeter.jsx';
-import { AddFood } from './AddFood.jsx';
+import { AddFood, Detail } from './AddFood.jsx';
 import { MEALS } from '../lib/meals.js';
 
 const n0 = (x) => Math.round(Number(x) || 0);
@@ -17,6 +17,7 @@ export function Day({ groups, onSignOut }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [adding, setAdding] = useState(null); // código de comida
+  const [editing, setEditing] = useState(null); // { entry, food }
   const [activities, setActivities] = useState([]);
   const [waterMl, setWaterMl] = useState(0);
   const [steps, setStepsValue] = useState(null);
@@ -46,6 +47,20 @@ export function Day({ groups, onSignOut }) {
     try {
       await deleteEntry(entry.id);
       setEntries((list) => list.filter((x) => x.id !== entry.id));
+      setEditing(null);
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function edit(entry) {
+    if (!entry.food_id) {
+      // El alimento ya no existe en la base: solo se puede eliminar el registro
+      remove(entry);
+      return;
+    }
+    try {
+      setEditing({ entry, food: await getFood(entry.food_id) });
     } catch (err) {
       alert(err.message);
     }
@@ -88,7 +103,7 @@ export function Day({ groups, onSignOut }) {
                 <button class="add-btn" aria-label={`Agregar a ${meal.name}`} onClick={() => setAdding(meal.code)}>+</button>
               </header>
               {list.map((e) => (
-                <button class="entry" key={e.id} onClick={() => remove(e)} title="Tocar para eliminar">
+                <button class="entry" key={e.id} onClick={() => edit(e)} title="Tocar para editar">
                   <span class="entry-main">
                     <span class="entry-name">{e.food_name}</span>
                     <span class="muted">{e.food_brand ? `${e.food_brand} · ` : ''}{describePortions(e.portions, groups)}</span>
@@ -113,6 +128,23 @@ export function Day({ groups, onSignOut }) {
           <button class="link" onClick={onSignOut}>Cerrar sesión</button>
         </footer>
       </main>
+
+      {editing && (
+        <div class="sheet-backdrop" onClick={(ev) => ev.target === ev.currentTarget && setEditing(null)}>
+          <div class="sheet" role="dialog" aria-modal="true">
+            <Detail
+              food={editing.food}
+              entry={editing.entry}
+              date={date}
+              meal={editing.entry.meal}
+              groups={groups}
+              onBack={() => setEditing(null)}
+              onDelete={() => remove(editing.entry)}
+              onAdded={(row) => { setEntries((l) => l.map((x) => (x.id === row.id ? row : x))); setEditing(null); }}
+            />
+          </div>
+        </div>
+      )}
 
       {adding && (
         <AddFood

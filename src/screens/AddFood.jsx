@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { searchFoods, recentFoods, getFood, addEntry, findByBarcode } from '../lib/api.js';
+import { searchFoods, recentFoods, getFood, addEntry, updateEntry, findByBarcode } from '../lib/api.js';
 import { fetchOFF, mapOFF } from '../lib/off.js';
 import { Scanner } from '../components/Scanner.jsx';
 import { macrosFor, portionsFor, describePortions } from '../lib/portions.js';
@@ -156,11 +156,19 @@ function Search({ query, setQuery, onPick, onNew, onScan, onClose }) {
   );
 }
 
-function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded }) {
+/**
+ * Cantidad, medida y tiempo de comida de un alimento. Con `entry` edita un
+ * registro existente en vez de crear uno nuevo.
+ */
+export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded, entry, onDelete }) {
   const def = food.measures.find((m) => m.is_default) || food.measures[0];
-  const [measureId, setMeasureId] = useState(def ? def.id : 'g');
+  const fromEntry = entry && (entry.measure_label === 'g' ? 'g' : food.measures.find((m) => m.label === entry.measure_label)?.id);
+  const initialId = entry ? fromEntry || 'g' : def ? def.id : 'g';
+  const [measureId, setMeasureId] = useState(initialId);
   const measure = food.measures.find((m) => m.id === measureId) || null;
-  const [quantity, setQuantity] = useState(def ? 1 : 100);
+  const [quantity, setQuantity] = useState(
+    entry ? (fromEntry ? Number(entry.quantity) : n1(entry.grams)) : def ? 1 : 100,
+  );
   const [meal, setMeal] = useState(initialMeal);
   const [busy, setBusy] = useState(false);
 
@@ -178,7 +186,8 @@ function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded }) {
     if (!(qty > 0)) return;
     setBusy(true);
     try {
-      onAdded(await addEntry({ food, date, meal, measure, quantity: qty, groups }));
+      const args = { food, date, meal, measure, quantity: qty, groups };
+      onAdded(entry ? await updateEntry(entry.id, args) : await addEntry(args));
     } catch (err) {
       alert(err.message);
       setBusy(false);
@@ -190,8 +199,8 @@ function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded }) {
   return (
     <>
       <header class="sheet-head">
-        <button class="link" onClick={onBack}>‹ Buscar</button>
-        <span />
+        <button class="link" onClick={onBack}>{entry ? 'Cerrar' : '‹ Buscar'}</button>
+        {entry ? <b>Editar registro</b> : <span />}
       </header>
       <div class="sheet-body">
         <h2 class="food-title">{food.name}{food.state && <span class="muted"> ({food.state})</span>}</h2>
@@ -234,8 +243,9 @@ function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded }) {
         </div>
 
         <button class="btn primary wide" disabled={busy || !(qty > 0)} onClick={save}>
-          {busy ? 'Guardando…' : 'Agregar'}
+          {busy ? 'Guardando…' : entry ? 'Guardar cambios' : 'Agregar'}
         </button>
+        {entry && <button class="link danger center" onClick={onDelete}>Eliminar registro</button>}
       </div>
     </>
   );
