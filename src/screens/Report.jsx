@@ -181,7 +181,9 @@ function ReportBody({ rep, plan }) {
         <table class="rt">
           <thead><tr><th>Indicador</th><th>Promedio</th><th>Meta</th><th>Dif.</th></tr></thead>
           <tbody>
-            <tr><td>Kcal activas</td><td>{nf(a.activeKcal)}</td><td>—</td><td>—</td></tr>
+            <tr><td>Kcal de entrenamiento</td><td>{nf(a.activeKcal)}</td><td>—</td><td>—</td></tr>
+            {a.totalKcal != null && <tr><td>Gasto total (reloj)</td><td>{nf(a.totalKcal)}</td><td>—</td><td>—</td></tr>}
+            {a.balance != null && <tr><td>Balance (comido − gastado)</td><td>{sign(a.balance, 0)}</td><td>—</td><td>—</td></tr>}
             <tr><td>Pasos</td><td>{nf(a.steps)}</td><td>{nf(a.stepsTarget)}</td><td class={tone(a.stepsDiff, 500)}>{sign(a.stepsDiff, 0)}</td></tr>
             <tr><td>Sueño (h)</td><td>{nf(a.sleep, 1)}</td><td>{nf(a.sleepTarget, 1)}</td><td class={tone(a.sleepDiff)}>{sign(a.sleepDiff)}</td></tr>
             <tr><td>Energía (1 a 5)</td><td>{nf(a.energy, 1)}</td><td>—</td><td>—</td></tr>
@@ -189,6 +191,9 @@ function ReportBody({ rep, plan }) {
             <tr><td>Cumplimiento de agua</td><td>{nf(a.waterPct)} %</td><td>100 %</td><td>—</td></tr>
           </tbody>
         </table>
+        {a.balance != null && (
+          <p class="muted hint">Balance promedio de {a.balanceDays} {a.balanceDays === 1 ? 'día' : 'días'} con comida y gasto registrados. En esos días equivale a ≈ {sign(a.expectedKg, 2)} kg (7,700 kcal ≈ 1 kg); compáralo con el cambio real de peso.</p>
+        )}
       </section>
 
       <section class="card">
@@ -247,12 +252,12 @@ function ReportBody({ rep, plan }) {
           <h2>Detalle por semana</h2>
           <div class="rt-scroll">
             <table class="rt">
-              <thead><tr><th>Semana</th><th>Días</th><th>Kcal</th><th>Grupos</th><th>Activas</th><th>Sueño</th><th>Agua</th><th>Peso</th></tr></thead>
+              <thead><tr><th>Semana</th><th>Días</th><th>Kcal</th><th>Grupos</th><th>Gasto</th><th>Balance</th><th>Sueño</th><th>Agua</th><th>Peso</th></tr></thead>
               <tbody>
                 {rep.weeks.map((w) => (
                   <tr key={w.week}>
                     <td>{short(w.week)}</td><td>{w.daysLogged}</td><td>{nf(w.kcal)}</td><td>{nf(w.groupsOnTarget, 1)}</td>
-                    <td>{nf(w.activeKcal)}</td><td>{nf(w.sleep, 1)}</td><td>{nf(w.waterL, 2)}</td><td>{w.weight != null ? nf(w.weight, 1) : '—'}</td>
+                    <td>{w.totalKcal != null ? nf(w.totalKcal) : '—'}</td><td>{w.balance != null ? sign(w.balance, 0) : '—'}</td><td>{nf(w.sleep, 1)}</td><td>{nf(w.waterL, 2)}</td><td>{w.weight != null ? nf(w.weight, 1) : '—'}</td>
                   </tr>
                 ))}
               </tbody>

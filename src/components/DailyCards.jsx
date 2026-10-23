@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { addWater, setSteps, addActivity, deleteActivity } from '../lib/api.js';
 import { STAGES, hasStages, stagesSummary, stageFields, fmtMin } from '../lib/sleep.js';
+import { dayEnergy } from '../lib/energy.js';
 import { ACTIVITY_KINDS, kindOf, GLASS_ML, isTrainingDay, waterTarget } from '../lib/activity.js';
 
 const n0 = (x) => Math.round(Number(x) || 0);
@@ -112,6 +113,66 @@ function AddActivity({ date, onClose, onAdded }) {
         </form>
       </div>
     </div>
+  );
+}
+
+/* --------------------------- Gasto del día --------------------------- */
+export function TotalKcalCard({ total, activities, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState('');
+  const input = useRef(null);
+  const workouts = activities.reduce((a, x) => a + Number(x.active_kcal || 0), 0);
+  const e = dayEnergy({ total, workouts });
+
+  useEffect(() => { if (editing) input.current?.focus(); }, [editing]);
+
+  function start() {
+    setValue(total != null ? String(n0(total)) : '');
+    setEditing(true);
+  }
+
+  async function save(ev) {
+    ev.preventDefault();
+    try {
+      await onSave({ total_kcal: value === '' ? null : Math.max(0, Math.round(Number(value))) });
+      setEditing(false);
+    } catch (err) {
+      alert(err.message.includes('total_kcal') ? 'Ejecuta la migración 0014 para guardar el gasto total.' : err.message);
+    }
+  }
+
+  const pct = e.total ? Math.min(e.workouts / e.total, 1) : 0;
+  return (
+    <section class="card">
+      <header class="card-head"><h2>Gasto del día</h2><span class="muted">kcal totales del reloj</span></header>
+      {editing ? (
+        <form class="steps-edit" onSubmit={save}>
+          <input ref={input} type="number" inputmode="numeric" min="0" value={value}
+            onInput={(ev) => setValue(ev.currentTarget.value)} placeholder="Kcal totales del día" />
+          <button class="btn primary">Guardar</button>
+          <button type="button" class="link" onClick={() => setEditing(false)}>Cancelar</button>
+        </form>
+      ) : (
+        <button class="metric-row as-btn" onClick={start} aria-label="Editar gasto total">
+          <span class="metric">⚡ <b>{e.total != null ? int(e.total) : '—'}</b><span class="muted"> kcal totales</span></span>
+          <span class="muted">✎</span>
+        </button>
+      )}
+      {e.total != null && (
+        <>
+          <div class="bar split" aria-hidden="true">
+            <span style={`width:${pct * 100}%;background:var(--warn)`} />
+            <span style={`width:${(1 - pct) * 100}%;background:var(--accent)`} />
+          </div>
+          <div class="split-legend">
+            <span><i style="background:var(--warn)" />Entrenamiento <b>{int(e.workouts)}</b></span>
+            <span><i style="background:var(--accent)" />Fuera del entreno <b>{int(e.outside)}</b></span>
+          </div>
+          {e.inconsistent && <p class="error">Las kcal de tus actividades superan el total. Revisa el dato del reloj.</p>}
+        </>
+      )}
+      {e.total == null && <p class="muted hint">Regístralo al final del día con el total que marca el reloj; la app resta las kcal de tus entrenamientos.</p>}
+    </section>
   );
 }
 

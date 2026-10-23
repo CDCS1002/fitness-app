@@ -6,6 +6,7 @@ import { DayHeader } from '../components/DayHeader.jsx';
 import { sumRoundedPortions, describePortions } from '../lib/portions.js';
 import { PortionBoard } from '../components/PortionBoard.jsx';
 import { KcalMeter } from '../components/KcalMeter.jsx';
+import { dayEnergy, balanceLabel } from '../lib/energy.js';
 import { AddFood, Detail } from './AddFood.jsx';
 import { MEALS } from '../lib/meals.js';
 
@@ -20,6 +21,7 @@ export function Day({ groups, date, setDate }) {
   const [adding, setAdding] = useState(null); // código de comida
   const [editing, setEditing] = useState(null); // { entry, food }
   const [waterMl, setWaterMl] = useState(0);
+  const [totalKcal, setTotalKcal] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -29,6 +31,7 @@ export function Day({ groups, date, setDate }) {
       setEntries(e);
       setPlan(p);
       setWaterMl(Number(log?.water_ml || 0));
+      setTotalKcal(log?.total_kcal != null ? Number(log.total_kcal) : null);
     } catch (err) {
       setError(err.message);
     }
@@ -77,6 +80,7 @@ export function Day({ groups, date, setDate }) {
           plan={plan}
           onPlanChange={setPlan}
         />
+        {totalKcal != null && <BalanceLine eaten={sum('kcal')} total={totalKcal} />}
 
         <PortionBoard totals={totals} targets={plan?.targets} groups={groups} />
 
@@ -138,5 +142,20 @@ export function Day({ groups, date, setDate }) {
         />
       )}
     </div>
+  );
+}
+
+/** Comido vs gastado (con el total del reloj registrado en Actividad). */
+function BalanceLine({ eaten, total }) {
+  const e = dayEnergy({ total, eaten });
+  const fmt = (n) => new Intl.NumberFormat('es', { useGrouping: 'always' }).format(Math.abs(n));
+  return (
+    <p class="balance-line">
+      <span>Comido <b>{fmt(Math.round(eaten))}</b></span>
+      <span>Gastado <b>{fmt(e.total)}</b></span>
+      <span class={e.balance < -100 ? 'up' : e.balance > 100 ? 'down' : ''}>
+        <b>{e.balance > 0 ? '+' : e.balance < 0 ? '−' : ''}{fmt(e.balance)}</b> {balanceLabel(e.balance)}
+      </span>
+    </p>
   );
 }

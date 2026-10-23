@@ -248,7 +248,7 @@ export async function progressRange(from, to) {
   const [entries, legacy, logs, activities, strength, exercises, weights, plans] = await Promise.all([
     supabase.from('meal_entries').select('eaten_on,kcal,protein,carbs,fat,portions').gte('eaten_on', from).lte('eaten_on', to),
     supabase.from('legacy_days').select('*').gte('day', from).lte('day', to),
-    supabase.from('daily_logs').select('day,water_ml,steps,sleep_h,energy').gte('day', from).lte('day', to),
+    supabase.from('daily_logs').select('*').gte('day', from).lte('day', to),
     supabase.from('activities').select('day,active_kcal').gte('day', from).lte('day', to),
     supabase.from('strength_entries').select('day,exercise_id,weight_kg,sets').gte('day', from).lte('day', to),
     supabase.from('exercises').select('id,name,measure,body'),

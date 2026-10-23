@@ -5,6 +5,7 @@
  */
 import { addDays, fromISO } from './dates.js';
 import { GROUP_ORDER } from './portions.js';
+import { expectedKg } from './energy.js';
 const REPORT_GROUPS = [...GROUP_ORDER, 'azucar'];
 import { waterTarget } from './activity.js';
 import { groupsOnTarget, planFor, weeklySummary } from './weekly.js';
@@ -58,6 +59,10 @@ export function buildReport({ days, plans, from, to, exclude = null, strength = 
   const waterL = r(of((d) => (d.waterMl ?? 0) / 1000), 2);
   const activity = {
     activeKcal: r(of((d) => d.activeKcal ?? 0)),
+    totalKcal: r(avg(isos.map((d) => days[d]?.totalKcal).filter((x) => x != null))),
+    balance: r(avg(logged.map((d) => d.balance).filter((x) => x != null))),
+    balanceDays: logged.filter((d) => d.balance != null).length,
+    expectedKg: (() => { const b = logged.map((d) => d.balance).filter((x) => x != null); return b.length ? expectedKg(b.reduce((a, x) => a + x, 0)) : null; })(),
     steps: r(of((d) => d.steps ?? 0)),
     stepsTarget: Number(plan?.steps_target ?? 10000),
     sleep: r(of((d) => d.sleep ?? null), 1),

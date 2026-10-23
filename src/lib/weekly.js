@@ -6,6 +6,7 @@
 import { addDays, fromISO, toISO } from './dates.js';
 import { sumRoundedPortions, GROUP_ORDER } from './portions.js';
 import { waterTarget } from './activity.js';
+import { expectedKg } from './energy.js';
 
 export function weekStart(iso) {
   const d = fromISO(iso);
@@ -35,6 +36,7 @@ export function buildDays({ entries = [], legacy = [], logs = [], activities = [
     const d = Object.assign(day(l.day), { waterMl: Number(l.water_ml || 0), steps: l.steps });
     if (l.sleep_h != null) d.sleep = Number(l.sleep_h);
     if (l.energy != null) d.energy = Number(l.energy);
+    if (l.total_kcal != null) d.totalKcal = Number(l.total_kcal);
   }
   for (const a of activities) {
     const d = day(a.day);
@@ -61,6 +63,8 @@ export function buildDays({ entries = [], legacy = [], logs = [], activities = [
     if (d.activeKcal == null && d.legacy?.active_kcal != null) d.activeKcal = Number(d.legacy.active_kcal);
     if (d.sleep == null && d.legacy?.sleep_h != null) d.sleep = Number(d.legacy.sleep_h);
     if (d.energy == null && d.legacy?.energy != null) d.energy = Number(d.legacy.energy);
+    // Balance del día: solo con comida y gasto total registrados
+    if (d.food && d.totalKcal != null) d.balance = d.food.kcal - d.totalKcal;
   }
   return days;
 }
@@ -85,6 +89,8 @@ export function weeklySummary(days, plans, from, to, exclude = null) {
     const weightsW = ds.filter((d) => d.weight != null).map((d) => d.weight);
 
     const of = (fn) => avg(logged.map(fn).filter((x) => x != null));
+    const withTotal = ds.filter((d) => d.totalKcal != null);
+    const withBalance = ds.filter((d) => d.balance != null);
     weeks.push({
       week: w,
       plan: plan?.name || null,
@@ -95,6 +101,10 @@ export function weeklySummary(days, plans, from, to, exclude = null) {
       fat: r(of((d) => d.food.fat)),
       groupsOnTarget: r(of((d) => groupsOnTarget(d.food.portions, (planFor(plans, d.day) || plan)?.targets)), 1),
       activeKcal: r(of((d) => d.activeKcal ?? 0)),
+      totalKcal: r(avg(withTotal.map((d) => d.totalKcal))),
+      balance: r(avg(withBalance.map((d) => d.balance))),
+      balanceDays: withBalance.length,
+      expectedKg: withBalance.length ? expectedKg(withBalance.reduce((a, d) => a + d.balance, 0)) : null,
       steps: r(of((d) => d.steps ?? 0)),
       waterL: r(of((d) => (d.waterMl ?? 0) / 1000), 2),
       waterPct: r(of((d) => (d.waterMl ?? 0) / waterTarget(d.day, planFor(plans, d.day) || plan)) * 100),

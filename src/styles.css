@@ -500,3 +500,15 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
   .emo-chip { border: 1px solid var(--line); }
   .core-bar, .core-bar span, .stage-legend i { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* ---------- Gasto del día y balance ---------- */
+.bar.split { display: flex; }
+.bar.split span { border-radius: 0; }
+.split-legend { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.split-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; }
+.split-legend b { color: var(--text); margin-left: 4px; }
+.balance-line { display: flex; justify-content: space-between; gap: 8px; margin: -4px 4px 4px; font-size: 13px; color: var(--muted); }
+.balance-line b { color: var(--text); }
+.balance-line .up b { color: var(--accent); }
+.balance-line .down b { color: var(--warn); }
+.week-grid .wide { grid-column: 1 / -1; }

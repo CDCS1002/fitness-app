@@ -24,6 +24,8 @@ supabase/seed/0010_list_foods.sql            alimentos de la lista de la nutrici
 supabase/migrations/0011_plan_2.sql          Planes 1 (24/08) y 2 (13/10) y grasa/músculo de la báscula de casa
 supabase/migrations/0012_sleep_stages_meds.sql fases del sueño, medicamentos y suplementos
 src/lib/sleep.js · src/lib/meds.js    fases del sueño; medicamentos, tomas y escáner (NIH DSLD → Open Food Facts)
+supabase/migrations/0014_total_kcal.sql gasto total del día (kcal totales del reloj)
+src/lib/energy.js                     fuera del entreno = total − actividades; balance comido − gastado
 supabase/migrations/0013_moods.sql    registros emocionales (momentos con hora y resumen del día)
 src/lib/emotions.js · moodReport.js   rueda de emociones (6 base › 36 › 72) con definiciones; reporte y patrones
 src/screens/Emotions.jsx · PsychReport.jsx  pestaña Emociones; reporte de psicología (en Progreso)

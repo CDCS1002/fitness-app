@@ -201,7 +201,12 @@ function WeeksCard({ weeks, plans }) {
                 <div><dt>Grupos en meta</dt><dd>{nf(w.groupsOnTarget, 1)} <small>/ 6</small></dd></div>
                 <div><dt>Proteína</dt><dd>{nf(w.protein)} g</dd></div>
                 <div><dt>Carbos · Grasa</dt><dd>{nf(w.carbs)} · {nf(w.fat)} g</dd></div>
-                <div><dt>Kcal activas</dt><dd>{nf(w.activeKcal)}</dd></div>
+                <div><dt>Kcal de entreno</dt><dd>{nf(w.activeKcal)}</dd></div>
+                <div><dt>Gasto total</dt><dd>{w.totalKcal != null ? nf(w.totalKcal) : '—'}</dd></div>
+                {w.balance != null && (
+                  <div class="wide"><dt>Balance diario · {w.balanceDays} {w.balanceDays === 1 ? 'día' : 'días'}</dt>
+                    <dd class={w.balance < 0 ? 'up' : 'down'}>{sign(w.balance, 0)} kcal <small>≈ {sign(w.expectedKg, 2)} kg esperados{w.weightChange != null ? ` · báscula ${sign(w.weightChange)} kg` : ''}</small></dd></div>
+                )}
                 <div><dt>Pasos</dt><dd>{nf(w.steps)}</dd></div>
                 <div><dt>Agua</dt><dd>{nf(w.waterL, 2)} L <small>({nf(w.waterPct)} %)</small></dd></div>
                 {w.sleep != null && <div><dt>Sueño · Energía</dt><dd>{nf(w.sleep, 1)} h · {nf(w.energy, 1)}</dd></div>}
