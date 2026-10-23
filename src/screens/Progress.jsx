@@ -92,9 +92,10 @@ function WeightCard({ weights, scans, onAdd }) {
             {prev && <span class={last.kg - prev.kg <= 0 ? 'up' : 'down'}>{sign(Math.round((last.kg - prev.kg) * 10) / 10)} kg desde {short(prev.day)}</span>}
           </div>
           <LineChart points={series.map((p) => ({ x: p.day, y: p.kg, hollow: p.inbody }))} unit="kg" />
+          <ScaleTrend weights={weights} />
           <p class="muted hint">
             {daysSince != null && daysSince >= 7 ? `Tu último pesaje fue hace ${daysSince} días. ` : ''}
-            Pésate una vez por semana, el mismo día, en la mañana y en ayunas. ○ = medición InBody.
+            Pésate una vez por semana, el mismo día, en la mañana y en ayunas. ○ = medición InBody (tu referencia).
           </p>
         </>
       ) : <p class="muted empty">Aún no hay pesos registrados.</p>}
@@ -106,12 +107,17 @@ function WeightSheet({ weights, onClose, onChanged }) {
   const [day, setDay] = useState(today());
   const existing = weights.find((w) => w.day === day);
   const [kg, setKg] = useState(existing ? String(existing.weight_kg) : weights.at(-1) ? String(weights.at(-1).weight_kg) : '');
+  const [fat, setFat] = useState(existing?.fat_pct != null ? String(existing.fat_pct) : '');
+  const [muscle, setMuscle] = useState(existing?.muscle_kg != null ? String(existing.muscle_kg) : '');
   const [busy, setBusy] = useState(false);
 
   async function save(e) {
     e.preventDefault();
     setBusy(true);
-    try { await saveWeight(day, Number(kg)); onChanged(); } catch (err) { alert(err.message); setBusy(false); }
+    const extra = {};
+    if (fat !== '' || existing?.fat_pct != null) extra.fat_pct = fat === '' ? null : Number(fat);
+    if (muscle !== '' || existing?.muscle_kg != null) extra.muscle_kg = muscle === '' ? null : Number(muscle);
+    try { await saveWeight(day, Number(kg), extra); onChanged(); } catch (err) { alert(err.message); setBusy(false); }
   }
   async function remove() {
     if (!confirm('¿Eliminar el peso de ese día?')) return;
@@ -121,12 +127,15 @@ function WeightSheet({ weights, onClose, onChanged }) {
   return (
     <div class="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div class="sheet short" role="dialog" aria-modal="true">
-        <header class="sheet-head"><b>Registrar peso</b><button class="link" onClick={onClose}>Cerrar</button></header>
+        <header class="sheet-head"><b>Pesaje semanal</b><button class="link" onClick={onClose}>Cerrar</button></header>
         <form class="sheet-body form" onSubmit={save}>
           <div class="grid2">
             <label>Fecha<input type="date" required max={today()} value={day} onInput={(e) => setDay(e.currentTarget.value)} /></label>
             <label>Peso (kg)<input type="number" inputmode="decimal" step="0.1" min="20" max="400" required value={kg} onInput={(e) => setKg(e.currentTarget.value)} /></label>
+            <label>Grasa (%) <small class="muted">opcional</small><input type="number" inputmode="decimal" step="0.1" min="1" max="79" value={fat} onInput={(e) => setFat(e.currentTarget.value)} /></label>
+            <label>Músculo (kg) <small class="muted">opcional</small><input type="number" inputmode="decimal" step="0.1" min="1" max="149" value={muscle} onInput={(e) => setMuscle(e.currentTarget.value)} /></label>
           </div>
+          <p class="muted hint">Datos de tu báscula de casa (FitDays). La grasa y el músculo solo se comparan entre pesajes de esta misma báscula; la referencia de composición corporal sigue siendo el InBody.</p>
           <button class="btn primary wide" disabled={busy || !kg}>{busy ? 'Guardando…' : existing ? 'Actualizar' : 'Guardar'}</button>
           {existing && <button type="button" class="link danger center" onClick={remove}>Eliminar este registro</button>}
         </form>
@@ -308,5 +317,22 @@ function Recalc({ onDone }) {
         <button class="btn ghost wide" onClick={run}>Recalcular registros</button>
       )}
     </section>
+  );
+}
+
+/* Grasa y músculo de la báscula de casa: solo contra el pesaje anterior de la misma báscula */
+function ScaleTrend({ weights }) {
+  const withComp = weights.filter((w) => w.fat_pct != null || w.muscle_kg != null);
+  const last = withComp.at(-1);
+  if (!last) return null;
+  const prev = withComp.at(-2);
+  const d = (k) => (prev && last[k] != null && prev[k] != null ? Math.round((Number(last[k]) - Number(prev[k])) * 10) / 10 : null);
+  const fat = d('fat_pct'), mus = d('muscle_kg');
+  return (
+    <div class="scale-trend">
+      <span class="muted small">Báscula de casa · {short(last.day)}</span>
+      {last.fat_pct != null && <span>Grasa <b>{nf(Number(last.fat_pct), 1)} %</b>{fat != null && fat !== 0 && <small class={fat < 0 ? 'up' : 'down'}> {sign(fat)}</small>}</span>}
+      {last.muscle_kg != null && <span>Músculo <b>{nf(Number(last.muscle_kg), 1)} kg</b>{mus != null && mus !== 0 && <small class={mus > 0 ? 'up' : 'down'}> {sign(mus)}</small>}</span>}
+    </div>
   );
 }

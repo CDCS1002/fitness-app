@@ -5,10 +5,10 @@ import { groupsFromRows, macrosFor, portionsFor } from './portions.js';
 export const DEFAULT_PLAN = {
   name: 'Plan 2',
   start_date: '2026-10-13',
-  targets: { proteina: 16, carbohidrato: 9, grasa: 3, lacteo: 2, vegetal: 3, fruta: 2, azucar: 1 },
-  kcal_target: 2060,
+  targets: { proteina: 16, carbohidrato: 9, grasa: 3, lacteo: 2, vegetal: 3, fruta: 2, azucar: 3 },
+  kcal_target: 2040,
   protein_target: 158,
-  carbs_target: 212,
+  carbs_target: 207,
   fat_target: 65,
 };
 
@@ -208,13 +208,18 @@ async function uid() {
 }
 
 export async function listWeights() {
+  // Sin la migración 0011 no existen grasa y músculo: se piden solo si están
+  const full = await supabase.from('body_weights').select('day,weight_kg,fat_pct,muscle_kg').order('day');
+  if (!full.error) return full.data;
   return check(await supabase.from('body_weights').select('day,weight_kg').order('day'));
 }
 
-export async function saveWeight(day, weight_kg) {
-  return check(
-    await supabase.from('body_weights').upsert({ user_id: await uid(), day, weight_kg }, { onConflict: 'user_id,day' }).select().single(),
-  );
+/** Pesaje de la báscula de casa (FitDays). Grasa y músculo son opcionales. */
+export async function saveWeight(day, weight_kg, extra = {}) {
+  const row = { user_id: await uid(), day, weight_kg };
+  if (extra.fat_pct !== undefined) row.fat_pct = extra.fat_pct;
+  if (extra.muscle_kg !== undefined) row.muscle_kg = extra.muscle_kg;
+  return check(await supabase.from('body_weights').upsert(row, { onConflict: 'user_id,day' }).select().single());
 }
 
 export async function deleteWeight(day) {
