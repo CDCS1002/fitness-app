@@ -142,8 +142,8 @@ export function DayEnergyCard({ dayActive, activities, bmr, onSave }) {
   }
 
   const parts = e.dayActive == null ? [] : [
-    { k: 'Reposo', sub: 'basal InBody', v: e.bmr, c: 'var(--surface-3, #5b6470)' },
-    { k: 'Fuera del entreno', v: e.outside, c: 'var(--accent)' },
+    { k: 'Reposo (InBody)', sub: 'basal InBody', v: e.bmr, c: 'var(--surface-3, #5b6470)' },
+    { k: 'Movimiento del día', v: e.outside, c: 'var(--accent)' },
     { k: 'Entrenamiento', v: e.workouts, c: 'var(--warn)' },
   ].filter((p) => p.v != null);
   const sum = parts.reduce((a, p) => a + p.v, 0) || 1;
@@ -157,13 +157,13 @@ export function DayEnergyCard({ dayActive, activities, bmr, onSave }) {
       {editing ? (
         <form class="steps-edit" onSubmit={save}>
           <input ref={input} type="number" inputmode="numeric" min="0" value={value}
-            onInput={(ev) => setValue(ev.currentTarget.value)} placeholder="Kcal activas del día" />
+            onInput={(ev) => setValue(ev.currentTarget.value)} placeholder="Kcal del anillo rojo" />
           <button class="btn primary">Guardar</button>
           <button type="button" class="link" onClick={() => setEditing(false)}>Cancelar</button>
         </form>
       ) : (
-        <button class="metric-row as-btn" onClick={start} aria-label="Editar kcal activas del día">
-          <span class="metric">🔥 <b>{e.dayActive != null ? int(e.dayActive) : '—'}</b><span class="muted"> kcal activas del día</span></span>
+        <button class="metric-row as-btn" onClick={start} aria-label="Editar kcal del anillo rojo">
+          <span class="metric">🔥 <b>{e.dayActive != null ? int(e.dayActive) : '—'}</b><span class="muted"> kcal anillo rojo</span></span>
           <span class="muted">✎</span>
         </button>
       )}
@@ -176,10 +176,10 @@ export function DayEnergyCard({ dayActive, activities, bmr, onSave }) {
             {parts.map((p) => <span key={p.k}><i style={`background:${p.c}`} />{p.k} <b>{int(p.v)}</b></span>)}
           </div>
           {e.bmr == null && <p class="muted hint">Registra un InBody con tasa metabólica basal para calcular el gasto total.</p>}
-          {e.inconsistent && <p class="error">Tus entrenamientos suman más que las kcal activas del día. Revisa el dato del reloj.</p>}
+          {e.inconsistent && <p class="error">Tus entrenamientos suman más que el anillo rojo. Revisa el dato del reloj.</p>}
         </>
       )}
-      {e.dayActive == null && <p class="muted hint">Al final del día, anota las kcal activas totales del reloj (anillo Moverse). La app resta tus entrenamientos y suma tu basal del InBody.</p>}
+      {e.dayActive == null && <p class="muted hint">Al final del día, anota las kcal del anillo rojo del reloj. La app separa tus entrenamientos y suma lo que gastas en reposo (basal del InBody).</p>}
     </section>
   );
 }
