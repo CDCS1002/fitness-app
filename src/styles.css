@@ -370,3 +370,8 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
   .notes-print { white-space: pre-wrap; margin: 0; }
   @page { margin: 12mm; }
 }
+
+/* ---------- Motor combinado ---------- */
+:root { --g-azucar: #b48ead; }
+.tag.list { background: color-mix(in srgb, var(--g-lacteo) 20%, transparent); color: var(--g-lacteo); }
+.recalc { display: grid; gap: 6px; margin-top: 18px; }

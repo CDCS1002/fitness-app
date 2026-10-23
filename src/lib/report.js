@@ -5,6 +5,7 @@
  */
 import { addDays, fromISO } from './dates.js';
 import { GROUP_ORDER } from './portions.js';
+const REPORT_GROUPS = [...GROUP_ORDER, 'azucar'];
 import { waterTarget } from './activity.js';
 import { groupsOnTarget, planFor, weeklySummary } from './weekly.js';
 import { analyze, markFor } from './strength.js';
@@ -42,11 +43,11 @@ export function buildReport({ days, plans, from, to, exclude = null, strength = 
     kcalTarget: kcalT.kcal, kcalLow: kcalT.low, kcalHigh: kcalT.high, kcalEstimated: kcalT.estimated,
     proteinTarget: kcalT.protein, carbsTarget: kcalT.carbs, fatTarget: kcalT.fat,
     daysInRange: logged.filter((d) => d.food.kcal >= kcalT.low && d.food.kcal <= kcalT.high).length,
-    portions: GROUP_ORDER.map((g) => {
+    portions: REPORT_GROUPS.map((g) => {
       const v = r(of((d) => Number(d.food.portions?.[g] || 0)), 1);
-      const t = targets[g] != null ? Number(targets[g]) : null;
+      const t = g === 'azucar' ? Number(targets.azucar ?? 1) : targets[g] != null ? Number(targets[g]) : null;
       return { group: g, avg: v, target: t, diff: diff(v, t) };
-    }),
+    }).filter((p) => p.group !== 'azucar' || p.avg > 0),
     allGroupsPct: logged.length
       ? r((logged.filter((d) => groupsOnTarget(d.food.portions, (planFor(plans, d.day) || plan)?.targets) === 6).length / logged.length) * 100)
       : null,

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { searchFoods, recentFoods, getFood, addEntry, updateEntry, findByBarcode } from '../lib/api.js';
 import { fetchOFF, mapOFF } from '../lib/off.js';
 import { Scanner } from '../components/Scanner.jsx';
-import { macrosFor, portionsFor, describePortions } from '../lib/portions.js';
+import { macrosFor, portionsFor, describePortions, subtypeFor } from '../lib/portions.js';
 import { NewFood } from './NewFood.jsx';
 import { MEALS } from '../lib/meals.js';
 
@@ -177,6 +177,8 @@ export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded,
     setQuantity(id === 'g' ? 100 : 1);
   }
 
+  // Productos de la lista sin etiqueta: se registran por unidad, no por gramos
+  const byList = food.source === 'lista';
   const qty = Number(quantity) || 0;
   const grams = (measure ? Number(measure.grams) : 1) * qty;
   const m = macrosFor(food, grams);
@@ -205,8 +207,9 @@ export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded,
       <div class="sheet-body">
         <h2 class="food-title">{food.name}{food.state && <span class="muted"> ({food.state})</span>}</h2>
         <p class="muted">
-          {[food.brand, groups[food.primary_group]?.name].filter(Boolean).join(' · ')}
+          {[food.brand, [groups[food.primary_group]?.name, food.source !== 'lista' && subtypeFor(food)].filter(Boolean).join(' ')].filter(Boolean).join(' · ')}
           {food.source === 'estimado' && !food.verified && <span class="tag">valores estimados</span>}
+          {food.source === 'lista' && <span class="tag list">equivalencia de la lista</span>}
         </p>
 
         <div class="qty-row">
@@ -217,15 +220,16 @@ export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded,
             <button aria-label="Más" onClick={() => setQuantity(n1(qty + step) || step)}>+</button>
           </div>
           <select value={measureId} onChange={(e) => changeMeasure(e.currentTarget.value)}>
-            {food.measures.map((x) => <option value={x.id} key={x.id}>{x.label} ({n1(x.grams)} g)</option>)}
-            <option value="g">gramos</option>
+            {food.measures.map((x) => <option value={x.id} key={x.id}>{byList ? x.label : `${x.label} (${n1(x.grams)} g)`}</option>)}
+            {!byList && <option value="g">gramos</option>}
           </select>
         </div>
 
         <div class="portion-preview">
           <span class="muted">Equivale a</span>
           <b>{describePortions(portions, groups)}</b>
-          <span class="muted">{n0(grams)} g</span>
+          {!byList && <span class="muted">{n0(grams)} g</span>}
+          {byList && <span class="muted">kcal y macros aproximados a partir de la equivalencia</span>}
         </div>
 
         <section class="macros small">

@@ -1,18 +1,18 @@
 /**
  * Metas de energía y macros del día.
  *
- * Si el plan no trae metas explícitas, se estiman a partir de las porciones con
- * los valores promedio por porción del Sistema de Equivalentes (SMAE). Estos
- * valores incluyen la grasa "típica" de cada grupo (p. ej. carnes de aporte
- * moderado), por eso dan más kcal que los macros base del motor de porciones.
+ * Si el plan no trae metas explícitas, se estiman a partir de las porciones con los
+ * valores por porción de la lista de intercambio de la nutricionista: proteína magra
+ * 45 kcal (7 P · 2 G), harina 80 (15 C · 3 P · 1 G), grasa 45 (5 G), lácteo descremado
+ * 100 (12 C · 8 P · ~1,5 G), vegetal 25 (5 C · 2 P), fruta 60 (15 C).
  */
 export const KCAL_PER_PORTION = {
-  proteina:     { kcal: 55, protein: 7, carbs: 0,  fat: 3 },
-  carbohidrato: { kcal: 70, protein: 2, carbs: 15, fat: 0 },
-  grasa:        { kcal: 45, protein: 0, carbs: 0,  fat: 5 },
-  lacteo:       { kcal: 95, protein: 9, carbs: 12, fat: 2 },
-  vegetal:      { kcal: 25, protein: 2, carbs: 4,  fat: 0 },
-  fruta:        { kcal: 60, protein: 0, carbs: 15, fat: 0 },
+  proteina:     { kcal: 45,  protein: 7, carbs: 0,  fat: 2 },
+  carbohidrato: { kcal: 80,  protein: 3, carbs: 15, fat: 1 },
+  grasa:        { kcal: 45,  protein: 0, carbs: 0,  fat: 5 },
+  lacteo:       { kcal: 100, protein: 8, carbs: 12, fat: 1.5 },
+  vegetal:      { kcal: 25,  protein: 2, carbs: 5,  fat: 0 },
+  fruta:        { kcal: 60,  protein: 0, carbs: 15, fat: 0 },
 };
 
 export function estimateFromPortions(targets = {}) {

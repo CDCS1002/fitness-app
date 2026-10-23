@@ -19,6 +19,8 @@ supabase/migrations/0005_progress.sql        peso, InBody, días históricos y P
 supabase/migrations/0006_sleep_energy.sql    sueño, energía y meta de sueño
 supabase/seed/0007_generic_foods.sql         112 alimentos genéricos (USDA) y corrección de genéricos estimados
 supabase/migrations/0008_visit.sql           próxima cita y notas para la nutricionista
+supabase/migrations/0009_combined_engine.sql motor combinado, grupo azúcar y equivalencia de tu leche
+supabase/seed/0010_list_foods.sql            alimentos de la lista de la nutricionista (56 genéricos, 39 de marca)
 src/lib/report.js                     reporte para la cita (misma estructura que la hoja Reporte cita)
 supabase/seed/0005_progress_import.sql       peso, InBody y Diario 13–21 oct del Sheet
 src/lib/weekly.js                     resumen semanal (misma lógica que la hoja Semanal)
@@ -33,29 +35,27 @@ src/screens/                          Login, Día, Agregar, Nuevo alimento
 tests/                                pruebas del motor (`npm test`)
 ```
 
-## Motor de porciones
+## Motor de porciones (combinado)
 
-Calibrado con ejemplos de la base de KG Nutrición:
+- **Valor de cada porción:** lista de intercambio de la nutricionista (Licda. María Paula Ruiz).
+- **Composición:** USDA FoodData Central o la etiqueta, por gramos reales.
+- **De KG Nutrición:** la proteína incidental de harinas no suma; leguminosas y fuentes de proteína sí.
 
-| Grupo | 1 porción |
-|---|---|
-| Proteína | 7 g de proteína |
-| Carbohidrato | 15 g de carbohidrato |
-| Grasa | 5 g de grasa |
-| Lácteo | 8 g proteína · 12 g carbos · 2 g grasa |
-| Vegetal | 5 g de carbohidrato |
-| Fruta | 15 g de carbohidrato |
+| Grupo | 1 porción | Grasa que ya incluye |
+|---|---|---|
+| Proteína | 7 g de proteína | hasta 8 g (magra 2 · semigrasa 5 · grasa 8) |
+| Carbohidrato (harina) | 15 g de carbohidratos | 1 g |
+| Lácteo | 12 g de lactosa, sin pasar de proteína ÷ 8 | hasta 8 g (descremado · semi · entero) |
+| Vegetal | 5 g de carbohidratos | 0 |
+| Fruta | 15 g de carbohidratos | 0 |
+| Grasa | 5 g de grasa | — |
+| Azúcar (fuera del plan) | 5 g de carbohidratos | 0 |
 
-1. El grupo principal del alimento define sus porciones y "consume" sus macros de referencia.
-2. La grasa restante cuenta como grasa (÷ 5).
-3. Los carbos restantes cuentan como carbohidrato (÷ 15), salvo en grasas, vegetales y frutas.
-4. La proteína restante solo cuenta si el alimento está marcado como fuente de proteína.
-5. `portions_override` (por 100 g) reemplaza el cálculo cuando el criterio clínico pesa más que la fórmula.
-6. Cada registro se redondea a medias porciones y el total del día suma esos valores.
-
-Los valores de cada grupo viven en la tabla `exchange_groups` y se pueden ajustar sin tocar código.
-
-**Pendiente de calibrar:** con 7 g por porción, el pollo frito de 200 g (53,6 g de proteína) da 7½ proteínas; KG reporta 8. Hacen falta más ejemplos para saber si usa 6,5 g o redondea hacia arriba.
+Solo la grasa que excede lo incluido cuenta como porciones de grasa. Carbos excedentes: en proteínas cuentan como
+harina; en lácteos, como azúcar. `portions_override` fija equivalencias de la lista (p. ej. leche 50 % proteína:
+1 taza = 1 lácteo + ½ proteína). Coincide con la lista donde sus medidas caseras son exactas y se corrige donde
+se quedan cortas (½ taza de arroz cocido ≈ 1,5 harinas). La opción *Recalcular registros* (pestaña Progreso)
+aplica el motor actual a los registros anteriores.
 
 ## Desarrollo
 

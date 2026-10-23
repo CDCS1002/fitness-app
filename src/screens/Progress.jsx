@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { listWeights, saveWeight, deleteWeight, listInbody, progressRange } from '../lib/api.js';
+import { listWeights, saveWeight, deleteWeight, listInbody, progressRange, recalcEntries, getGroups } from '../lib/api.js';
 import { buildDays, weeklySummary, weekStart, planFor } from '../lib/weekly.js';
 import { dayTargets } from '../lib/targets.js';
 import { MAIN_METRICS, INBODY_SECTIONS, metricChange } from '../lib/inbody.js';
@@ -41,6 +41,7 @@ export function Progress({ onSignOut }) {
         <WeightCard weights={weights} scans={scans} onAdd={() => setSheet('weight')} />
         <WeeksCard weeks={weeks} plans={plans} />
         <InbodyCard scans={scans} onAdd={() => setSheet({ inbody: null })} onEdit={(s) => setSheet({ inbody: s })} />
+        <Recalc onDone={load} />
         <footer class="foot">
           {plans[0] && <span class="muted">{plans[0].name} · desde {plans[0].start_date}</span>}
           <button class="link" onClick={onSignOut}>Cerrar sesión</button>
@@ -279,5 +280,33 @@ function LineChart({ points, unit }) {
       <text x={W - PX} y={Y(max) - 6} class="lc-label" text-anchor="end">{nf(max, 1)}</text>
       <text x={W - PX} y={Y(min) + 14} class="lc-label" text-anchor="end">{nf(min, 1)}</text>
     </svg>
+  );
+}
+
+/* ------------------- Recalcular porciones de registros ------------------- */
+function Recalc({ onDone }) {
+  const [state, setState] = useState(null); // null | {done,total} | {result}
+  async function run() {
+    if (!confirm('Se recalcularán las porciones y macros de todos tus registros de comida con las reglas y los valores actuales de cada alimento. ¿Continuar?')) return;
+    setState({ done: 0, total: 0 });
+    try {
+      const groups = await getGroups();
+      const result = await recalcEntries(groups, (done, total) => setState({ done, total }));
+      setState({ result });
+      onDone();
+    } catch (err) { alert(err.message); setState(null); }
+  }
+  return (
+    <section class="card recalc">
+      <h2>Recalcular porciones</h2>
+      <p class="muted hint">Aplica el motor de porciones actual a todos tus registros anteriores. Úsalo después de un cambio de reglas o de corregir un alimento.</p>
+      {state?.result ? (
+        <p class="up">Listo: {state.result.updated} de {state.result.total} registros actualizados.</p>
+      ) : state ? (
+        <p class="muted">Actualizando… {state.done} de {state.total || '…'}</p>
+      ) : (
+        <button class="btn ghost wide" onClick={run}>Recalcular registros</button>
+      )}
+    </section>
   );
 }

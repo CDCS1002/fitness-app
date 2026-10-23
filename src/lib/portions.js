@@ -1,42 +1,52 @@
 /**
- * Motor de porciones (sistema de equivalentes / intercambios).
+ * Motor de porciones combinado.
  *
- * Calibrado con ejemplos de KG Nutrición:
- *   Pan 30 g (15 C, 1.2 G)            → 1 carbohidrato
- *   Pasta salsa blanca 80 g (14.2 C, 2.8 G) → 1 carbohidrato + ½ grasa
- *   Arroz con camarones 60 g (14.7 C, 3.4 P) → 1 carbohidrato + ½ proteína
- *   Aguacate 35 g (5.1 G, 2.7 C)      → 1 grasa
- *   Ensalada 140 g (4.8 C)            → 1 vegetal
- *   Pollo frito 200 g (53.6 P, 22.2 G) → 8 proteínas + 4.5 grasas
+ * - Valor de cada porción: lista de intercambio de la nutricionista
+ *   (Licda. María Paula Ruiz): harina 15 C · 3 P · 1 G; vegetal 5 C · 2 P;
+ *   fruta 15 C; lácteo 12 C · 8 P (grasa según tipo); proteína 7 P (grasa según tipo);
+ *   grasa 5 G; azúcar 5 C.
+ * - Composición: USDA FoodData Central o la etiqueta, por gramos reales. Así el motor
+ *   coincide con la lista donde sus medidas caseras son exactas y se corrige solo
+ *   donde se quedan cortas (p. ej. ½ taza de arroz cocido ≈ 1,5 harinas).
+ * - De KG Nutrición: la proteína incidental de harinas no suma; las leguminosas y los
+ *   alimentos marcados como fuente de proteína sí.
  *
  * Reglas:
- *  1. El grupo principal del alimento define sus porciones con su macro base
- *     (p. ej. carbohidrato = carbos ÷ 15) y "consume" los macros de referencia del grupo.
- *  2. La grasa restante siempre cuenta como porciones de grasa (÷ 5).
- *  3. Los carbos restantes cuentan como carbohidrato (÷ 15), salvo en grasas,
- *     vegetales y frutas (en esos grupos son parte del propio alimento).
- *  4. La proteína restante solo cuenta si el alimento es fuente de proteína
- *     (la proteína incidental del pan o la pasta no se suma).
- *  5. Si el alimento tiene `portions_override` (por 100 g), se usa tal cual.
+ *  1. El grupo principal define sus porciones con su macro base (harina = carbos ÷ 15,
+ *     lácteo = lactosa ÷ 12 sin pasar de proteína ÷ 8, proteína = proteína ÷ 7…).
+ *  2. La grasa que cada porción ya incluye no suma porciones de grasa:
+ *     proteína hasta 8 g (magra 2, semigrasa 5, grasa 8), lácteo hasta 8 g
+ *     (descremado ≤ 3, semidescremado 5, entero 8), harina 1 g. Solo el excedente
+ *     cuenta como grasa (÷ 5): frituras, salsas, galletas, aderezos.
+ *  3. Carbos excedentes: en proteínas cuentan como harina (empanizados); en lácteos,
+ *     como azúcar (yogures endulzados). En grasas, vegetales y frutas son parte del alimento.
+ *  4. La proteína excedente solo cuenta si el alimento es fuente de proteína
+ *     (leguminosas, frutos secos, yogur griego, leches altas en proteína).
+ *  5. `portions_override` (por 100 g) reemplaza el cálculo: equivalencias fijadas a mano.
  */
 
+/** Los seis grupos del plan. */
 export const GROUP_ORDER = ['proteina', 'carbohidrato', 'grasa', 'lacteo', 'vegetal', 'fruta'];
+/** Todos los grupos, incluido azúcar (fuera del plan; se muestra solo si se consume). */
+export const ALL_GROUPS = [...GROUP_ORDER, 'azucar'];
 
 export const DEFAULT_GROUPS = {
-  proteina:     { name: 'Proteína',     basis_macro: 'protein', basis_grams: 7,  protein_ref: 7, carbs_ref: 0,  fat_ref: 0, color: '#e4572e' },
-  carbohidrato: { name: 'Carbohidrato', basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, color: '#f3a712' },
-  grasa:        { name: 'Grasa',        basis_macro: 'fat',     basis_grams: 5,  protein_ref: 0, carbs_ref: 0,  fat_ref: 5, color: '#a8c686' },
-  lacteo:       { name: 'Lácteo',       basis_macro: 'protein', basis_grams: 8,  protein_ref: 8, carbs_ref: 12, fat_ref: 2, color: '#4f9de0' },
-  vegetal:      { name: 'Vegetal',      basis_macro: 'carbs',   basis_grams: 5,  protein_ref: 2, carbs_ref: 5,  fat_ref: 0, color: '#3fae6a' },
-  fruta:        { name: 'Fruta',        basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, color: '#d64f9a' },
+  proteina:     { name: 'Proteína',     basis_macro: 'protein', basis_grams: 7,  protein_ref: 7, carbs_ref: 0,  fat_ref: 0, fat_cap: 8, color: '#e4572e' },
+  carbohidrato: { name: 'Carbohidrato', basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, fat_cap: 1, color: '#f3a712' },
+  grasa:        { name: 'Grasa',        basis_macro: 'fat',     basis_grams: 5,  protein_ref: 0, carbs_ref: 0,  fat_ref: 5, fat_cap: 0, color: '#a8c686' },
+  lacteo:       { name: 'Lácteo',       basis_macro: 'carbs',   basis_grams: 12, protein_ref: 8, carbs_ref: 12, fat_ref: 0, fat_cap: 8, color: '#4f9de0' },
+  vegetal:      { name: 'Vegetal',      basis_macro: 'carbs',   basis_grams: 5,  protein_ref: 2, carbs_ref: 5,  fat_ref: 0, fat_cap: 0, color: '#3fae6a' },
+  fruta:        { name: 'Fruta',        basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, fat_cap: 0, color: '#d64f9a' },
+  azucar:       { name: 'Azúcar',       basis_macro: 'carbs',   basis_grams: 5,  protein_ref: 0, carbs_ref: 5,  fat_ref: 0, fat_cap: 0, color: '#b48ead' },
 };
 
-const NO_SECONDARY_CARBS = new Set(['grasa', 'vegetal', 'fruta']);
-
-/** Convierte filas de la tabla exchange_groups a un mapa por código. */
+/**
+ * Configuración de grupos desde la tabla exchange_groups. Si la base aún no tiene
+ * las columnas del motor combinado (fat_cap), se usan los valores del código.
+ */
 export function groupsFromRows(rows) {
-  if (!rows?.length) return DEFAULT_GROUPS;
-  const map = {};
+  if (!rows?.length || !rows.some((r) => r.fat_cap != null)) return DEFAULT_GROUPS;
+  const map = { ...DEFAULT_GROUPS };
   for (const r of rows) {
     map[r.code] = {
       name: r.name,
@@ -45,6 +55,7 @@ export function groupsFromRows(rows) {
       protein_ref: Number(r.protein_ref),
       carbs_ref: Number(r.carbs_ref),
       fat_ref: Number(r.fat_ref),
+      fat_cap: Number(r.fat_cap ?? DEFAULT_GROUPS[r.code]?.fat_cap ?? 0),
       color: r.color || DEFAULT_GROUPS[r.code]?.color,
     };
   }
@@ -71,6 +82,7 @@ export function macrosFor(food, grams) {
 export function portionsFor(food, grams, groups = DEFAULT_GROUPS) {
   const out = {};
   const add = (g, n) => { if (n > 0) out[g] = (out[g] || 0) + n; };
+  const G = (code) => groups[code] || DEFAULT_GROUPS[code];
 
   if (food.portions_override && Object.keys(food.portions_override).length) {
     for (const [g, n] of Object.entries(food.portions_override)) add(g, Number(n) * grams / 100);
@@ -79,25 +91,39 @@ export function portionsFor(food, grams, groups = DEFAULT_GROUPS) {
 
   const m = macrosFor(food, grams);
   const code = food.primary_group;
-  const g = groups[code];
+  const g = G(code);
   if (!g) return out;
 
   const basis = { protein: m.protein, carbs: m.carbs, fat: m.fat }[g.basis_macro];
-  const n = basis / g.basis_grams;
+  let n = basis / g.basis_grams;
+  // Lácteo: por lactosa, pero sin pasar de lo que respalda su proteína (8 g por porción);
+  // así el azúcar añadido de un yogur endulzado no se cuenta como más lácteo.
+  if (code === 'lacteo' && m.protein > 0) n = Math.min(n, m.protein / g.protein_ref);
   add(code, n);
 
-  let protein = Math.max(0, m.protein - n * g.protein_ref);
-  let carbs = Math.max(0, m.carbs - n * g.carbs_ref);
-  let fat = Math.max(0, m.fat - n * g.fat_ref);
+  const protein = Math.max(0, m.protein - n * g.protein_ref);
+  const carbs = Math.max(0, m.carbs - n * g.carbs_ref);
+  const fat = code === 'grasa' ? 0 : Math.max(0, m.fat - n * (g.fat_cap ?? 0));
 
-  if (code !== 'grasa') add('grasa', fat / groups.grasa.basis_grams);
-  if (!NO_SECONDARY_CARBS.has(code) && code !== 'carbohidrato') {
-    add('carbohidrato', carbs / groups.carbohidrato.basis_grams);
-  }
-  if (food.protein_source && code !== 'proteina' && code !== 'lacteo') {
-    add('proteina', protein / groups.proteina.basis_grams);
-  }
+  add('grasa', fat / G('grasa').basis_grams);
+  if (code === 'proteina') add('carbohidrato', carbs / G('carbohidrato').basis_grams);
+  if (code === 'lacteo') add('azucar', carbs / G('azucar').basis_grams);
+  if (food.protein_source && code !== 'proteina') add('proteina', protein / G('proteina').basis_grams);
   return out;
+}
+
+/** Subtipo según la lista: proteína magra/semigrasa/grasa y lácteo descremado/semidescremado/entero. */
+export function subtypeFor(food) {
+  const p = Number(food.protein || 0), c = Number(food.carbs || 0), f = Number(food.fat || 0);
+  if (food.primary_group === 'proteina' && p > 0) {
+    const perPortion = (f / p) * 7;
+    return perPortion <= 3 ? 'magra' : perPortion <= 6.5 ? 'semigrasa' : 'grasa';
+  }
+  if (food.primary_group === 'lacteo' && c > 0) {
+    const perPortion = (f / c) * 12;
+    return perPortion <= 3 ? 'descremado' : perPortion <= 6.5 ? 'semidescremado' : 'entero';
+  }
+  return null;
 }
 
 /** Redondeo a medias porciones, como en las listas de intercambio. */
@@ -108,7 +134,7 @@ export function roundHalf(n) {
 /** Porciones redondeadas, sin los grupos que quedan en 0. */
 export function roundedPortions(portions) {
   const out = {};
-  for (const g of GROUP_ORDER) {
+  for (const g of ALL_GROUPS) {
     const r = roundHalf(portions[g] || 0);
     if (r > 0) out[g] = r;
   }
@@ -136,10 +162,10 @@ export function sumRoundedPortions(entries) {
   return out;
 }
 
-/** "1 carbohidrato + ½ proteína" */
+/** "1 harina + ½ proteína" */
 export function describePortions(portions, groups = DEFAULT_GROUPS) {
   const r = roundedPortions(portions);
-  const parts = GROUP_ORDER.filter((g) => r[g]).map((g) => `${fmtHalf(r[g])} ${(groups[g]?.name || g).toLowerCase()}`);
+  const parts = ALL_GROUPS.filter((g) => r[g]).map((g) => `${fmtHalf(r[g])} ${((groups[g] || DEFAULT_GROUPS[g])?.name || g).toLowerCase()}`);
   return parts.length ? parts.join(' + ') : 'libre';
 }
 

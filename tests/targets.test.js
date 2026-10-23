@@ -6,10 +6,10 @@ const PLAN = { targets: { proteina: 15, carbohidrato: 9, grasa: 3, lacteo: 2, ve
 
 test('Estimación de kcal y macros desde las porciones del plan', () => {
   const e = estimateFromPortions(PLAN.targets);
-  assert.equal(e.kcal, 15 * 55 + 9 * 70 + 3 * 45 + 2 * 95 + 3 * 25 + 2 * 60); // 1975
-  assert.equal(e.protein, 105 + 18 + 18 + 6);
-  assert.equal(e.carbs, 135 + 24 + 12 + 30);
-  assert.equal(e.fat, 45 + 15 + 4);
+  assert.equal(e.kcal, 15 * 45 + 9 * 80 + 3 * 45 + 2 * 100 + 3 * 25 + 2 * 60); // 1925
+  assert.equal(e.protein, 105 + 27 + 16 + 6);
+  assert.equal(e.carbs, 135 + 24 + 15 + 30);
+  assert.equal(e.fat, 30 + 9 + 15 + 3);
 });
 
 test('Meta explícita y tolerancia ±10 %', () => {

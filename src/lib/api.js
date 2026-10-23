@@ -252,3 +252,42 @@ export async function progressRange(from, to) {
 export async function listPlans() {
   return check(await supabase.from('plans').select('*').order('start_date', { ascending: false }));
 }
+
+// ---------------------------------------------------------------------
+// Recalcular registros con el motor y los valores actuales de cada alimento
+// ---------------------------------------------------------------------
+export async function recalcEntries(groups, onProgress = () => {}) {
+  const { macrosFor, portionsFor } = await import('./portions.js');
+  const r2 = (n) => (n == null ? null : Math.round(n * 100) / 100);
+  // Registros (paginados de 1000 en 1000)
+  const entries = [];
+  for (let from = 0; ; from += 1000) {
+    const page = check(await supabase.from('meal_entries').select('id,food_id,grams,portions,kcal').not('food_id', 'is', null).range(from, from + 999));
+    entries.push(...page);
+    if (page.length < 1000) break;
+  }
+  // Alimentos involucrados
+  const ids = [...new Set(entries.map((e) => e.food_id))];
+  const foods = {};
+  for (let i = 0; i < ids.length; i += 100) {
+    for (const f of check(await supabase.from('foods').select(FOOD_COLS).in('id', ids.slice(i, i + 100)))) foods[f.id] = f;
+  }
+  // Solo actualiza los que cambian
+  const changes = [];
+  for (const e of entries) {
+    const f = foods[e.food_id];
+    if (!f) continue;
+    const g = Number(e.grams);
+    const m = macrosFor(f, g);
+    const portions = Object.fromEntries(Object.entries(portionsFor(f, g, groups)).map(([k, v]) => [k, r2(v)]));
+    const patch = { portions, kcal: r2(m.kcal), protein: r2(m.protein), carbs: r2(m.carbs), fat: r2(m.fat), fiber: r2(m.fiber) };
+    if (JSON.stringify(portions) !== JSON.stringify(e.portions) || r2(m.kcal) !== Number(e.kcal)) changes.push([e.id, patch]);
+  }
+  let done = 0;
+  for (let i = 0; i < changes.length; i += 10) {
+    await Promise.all(changes.slice(i, i + 10).map(([id, patch]) => supabase.from('meal_entries').update(patch).eq('id', id).then(check)));
+    done = Math.min(i + 10, changes.length);
+    onProgress(done, changes.length);
+  }
+  return { total: entries.length, updated: changes.length };
+}
