@@ -1,0 +1,541 @@
+[
+ {
+  "day": "2026-10-13",
+  "exercise": "Remo cerrado con mancuernas",
+  "weight": 20.0,
+  "sets": [
+   12,
+   12,
+   10
+  ],
+  "rpe": 6
+ },
+ {
+  "day": "2026-10-13",
+  "exercise": "Press cerrado con barra Rumana",
+  "weight": 30.0,
+  "sets": [
+   10,
+   10,
+   8
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-13",
+  "exercise": "Remo con mancuerna unilateral",
+  "weight": 27.5,
+  "sets": [
+   12,
+   12,
+   10
+  ],
+  "rpe": 5
+ },
+ {
+  "day": "2026-10-13",
+  "exercise": "Extension de triceps unilateral",
+  "weight": 10.0,
+  "sets": [
+   10,
+   10,
+   8
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-13",
+  "exercise": "Jalón a la cara",
+  "weight": 25.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-13",
+  "exercise": "Extension de tríceps sobre la cabeza",
+  "weight": 25.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 5
+ },
+ {
+  "day": "2026-10-13",
+  "exercise": "Plancha",
+  "weight": 0.0,
+  "sets": [
+   60,
+   60,
+   60
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-13",
+  "exercise": "Crunch en polea",
+  "weight": 36.2,
+  "sets": [
+   12,
+   12,
+   12
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-14",
+  "exercise": "Prensa de piernas",
+  "weight": 160.0,
+  "sets": [
+   8,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-14",
+  "exercise": "Pantorrilla de pie",
+  "weight": 50.0,
+  "sets": [
+   10,
+   8,
+   8
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-14",
+  "exercise": "Extensión de cuádriceps",
+  "weight": 36.0,
+  "sets": [
+   10,
+   12,
+   10
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-14",
+  "exercise": "Curl femoral",
+  "weight": 35.0,
+  "sets": [
+   12,
+   12,
+   12
+  ],
+  "rpe": 5
+ },
+ {
+  "day": "2026-10-14",
+  "exercise": "Abducción de cadera en máquina",
+  "weight": 65.0,
+  "sets": [
+   12,
+   12,
+   12
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-14",
+  "exercise": "Rueda abdominal",
+  "weight": 0.0,
+  "sets": [
+   12,
+   12,
+   12
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-14",
+  "exercise": "Hiperextensión de glúteo",
+  "weight": 10.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Press de banca con mancuerna",
+  "weight": 32.5,
+  "sets": [
+   7,
+   7,
+   6
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Curl martillo",
+  "weight": 15.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Apeturas en polea declinada",
+  "weight": 10.0,
+  "sets": [
+   12,
+   12,
+   12
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Curl hacia al frente con polea",
+  "weight": 7.5,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Press inclinado con polea",
+  "weight": 10.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Curl predicador con barra",
+  "weight": 15.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Elevaciones laterales",
+  "weight": 10.0,
+  "sets": [
+   8,
+   8,
+   8
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Crunch en polea",
+  "weight": 36.2,
+  "sets": [
+   25,
+   25,
+   25
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-15",
+  "exercise": "Plancha lateral",
+  "weight": 0.0,
+  "sets": [
+   30,
+   30,
+   30
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Press inclinado con mancuernas",
+  "weight": 27.5,
+  "sets": [
+   7,
+   7,
+   6
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Curl de bíceps con rotación",
+  "weight": 11.3,
+  "sets": [
+   8,
+   8,
+   8
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Jalón al pecho neutro",
+  "weight": 65.0,
+  "sets": [
+   8,
+   8,
+   8
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Patada de burro con polea",
+  "weight": 15.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Sentadilla copa",
+  "weight": 30.0,
+  "sets": [
+   8,
+   8,
+   8
+  ],
+  "rpe": 6
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Desplantes búlgaros",
+  "weight": 0.0,
+  "sets": [
+   8,
+   8,
+   8
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Hombro polea cruzada",
+  "weight": 15.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-19",
+  "exercise": "Pallof press",
+  "weight": 35.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Remo cerrado con mancuernas",
+  "weight": 22.5,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Curl martillo",
+  "weight": 17.5,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Remo con mancuerna unilateral",
+  "weight": 30.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Curl hacia al frente con polea",
+  "weight": 20.0,
+  "sets": [
+   8,
+   8,
+   10
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Jalón a la cara",
+  "weight": 35.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Curl predicador con mancuerna",
+  "weight": 15.0,
+  "sets": [
+   6,
+   6,
+   6
+  ],
+  "rpe": 10
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Elevaciones laterales",
+  "weight": 12.5,
+  "sets": [
+   12,
+   12,
+   12
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Crunch en polea",
+  "weight": 43.0,
+  "sets": [
+   20,
+   20,
+   20
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-20",
+  "exercise": "Plancha",
+  "weight": 0.0,
+  "sets": [
+   70,
+   70,
+   70
+  ],
+  "rpe": 10
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Prensa de piernas",
+  "weight": 160.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Pantorrilla de pie",
+  "weight": 50.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Extensión de cuádriceps",
+  "weight": 55.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Curl femoral",
+  "weight": 45.0,
+  "sets": [
+   9,
+   9,
+   9
+  ],
+  "rpe": 9
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Abducción de cadera en máquina",
+  "weight": 70.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 8
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Aducción de cadera en máquina",
+  "weight": 72.5,
+  "sets": [
+   15,
+   15,
+   15
+  ],
+  "rpe": 7
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Hiperextensión de glúteo",
+  "weight": 10.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 10
+ },
+ {
+  "day": "2026-10-21",
+  "exercise": "Rueda abdominal",
+  "weight": 0.0,
+  "sets": [
+   10,
+   10,
+   10
+  ],
+  "rpe": 10
+ }
+]

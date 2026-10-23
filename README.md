@@ -12,6 +12,9 @@ PWA para registrar comidas por **porciones de intercambio** (proteína, carbohid
 supabase/migrations/0001_schema.sql   tablas, RLS, búsqueda (pg_trgm + unaccent)
 supabase/migrations/0002_daily_activity.sql  agua, pasos y actividad
 supabase/migrations/0003_kcal_targets.sql    metas de kcal y macros
+supabase/migrations/0004_strength.sql        ejercicios y registros de fuerza
+supabase/seed/0004_strength_import.sql       catálogo e historial del Sheet (`node scripts/build-strength-seed.mjs`)
+src/lib/strength.js                   doble progresión, 1RM estimado y volumen
 src/lib/targets.js                    metas del día (explícitas o estimadas por porciones)
 supabase/seed/foods.json              alimentos iniciales (editar aquí)
 supabase/seed/0002_foods.sql          generado con `npm run seed`
@@ -61,3 +64,7 @@ npm run dev
 3. Si tampoco está ahí, abre el formulario con el código ya puesto para copiar la etiqueta.
 
 Lo que guardas queda en tu base, así que el siguiente escaneo del mismo producto es instantáneo.
+
+## Fuerza
+
+Misma lógica que la hoja Fuerza del Sheet: rango 6–10 reps (30–90 s en isométricos); si todas las series llegan al máximo se sube la carga (+5 kg tren inferior, +2,5 kg superior, core e isométricos), si alguna queda por debajo del mínimo se baja, y si no se mantiene. La marca es el 1RM estimado (Epley) con la mejor serie. `tests/strength.test.js` reproduce casos reales del Sheet.

@@ -1,0 +1,483 @@
+[
+ {
+  "name": "Sentadilla con barra",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Peso muerto rumano",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Prensa de piernas",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Extensión de cuádriceps",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Curl femoral",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Hip thrust",
+  "muscle": "Glúteo",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Pantorrilla de pie",
+  "muscle": "Pantorrilla",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Press de banca con mancuerna",
+  "muscle": "Pecho",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Press inclinado con mancuernas",
+  "muscle": "Pecho",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   1,
+   4
+  ]
+ },
+ {
+  "name": "Aperturas en polea recta",
+  "muscle": "Pecho",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Fondos en paralelas",
+  "muscle": "Tríceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Extensión de tríceps en polea",
+  "muscle": "Tríceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Press francés",
+  "muscle": "Tríceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Jalón al pecho neutro",
+  "muscle": "Espalda",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   1,
+   2
+  ]
+ },
+ {
+  "name": "Remo con barra",
+  "muscle": "Espalda",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Remo con mancuerna unilateral",
+  "muscle": "Espalda",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Remo en polea baja",
+  "muscle": "Espalda",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Curl con barra",
+  "muscle": "Bíceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Curl martillo",
+  "muscle": "Bíceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Curl predicador con barra",
+  "muscle": "Bíceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Press militar con mancuernas",
+  "muscle": "Hombro anterior",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   1,
+   4
+  ]
+ },
+ {
+  "name": "Elevaciones laterales",
+  "muscle": "Hombro lateral",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Face pull",
+  "muscle": "Hombro posterior",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Pájaros con mancuernas",
+  "muscle": "Hombro posterior",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Crunch en polea",
+  "muscle": "Abdomen",
+  "body": "core",
+  "measure": "reps",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Elevación de piernas colgado",
+  "muscle": "Abdomen",
+  "body": "core",
+  "measure": "reps",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Rueda abdominal",
+  "muscle": "Abdomen",
+  "body": "core",
+  "measure": "reps",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Pallof press",
+  "muscle": "Abdomen",
+  "body": "core",
+  "measure": "reps",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Remo cerrado con mancuernas",
+  "muscle": "Espalda",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Press cerrado con barra Rumana",
+  "muscle": "Tríceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Extension de triceps unilateral",
+  "muscle": "Tríceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Jalón a la cara",
+  "muscle": "Espalda",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Extension de tríceps sobre la cabeza",
+  "muscle": "Tríceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Plancha",
+  "muscle": "Abdomen",
+  "body": "core",
+  "measure": "segundos",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Abducción de cadera en máquina",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Aducción de cadera en máquina",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   3
+  ]
+ },
+ {
+  "name": "Plancha lateral",
+  "muscle": "Abdomen",
+  "body": "core",
+  "measure": "segundos",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Hollow hold",
+  "muscle": "Abdomen",
+  "body": "core",
+  "measure": "segundos",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Hiperextensión de glúteo",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ]
+ },
+ {
+  "name": "Press inclinado con polea",
+  "muscle": "Pecho",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Curl predicador con mancuerna",
+  "muscle": "Bíceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Curl hacia al frente con polea",
+  "muscle": "Bíceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   2
+  ]
+ },
+ {
+  "name": "Aperturas en polea inclinada",
+  "muscle": "Pecho",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Apeturas en polea declinada",
+  "muscle": "Pecho",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   4
+  ]
+ },
+ {
+  "name": "Curl de bíceps con rotación",
+  "muscle": "Bíceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   1,
+   2
+  ]
+ },
+ {
+  "name": "Patada de burro con polea",
+  "muscle": "Tríceps",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   1,
+   4
+  ]
+ },
+ {
+  "name": "Sentadilla copa",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   1,
+   3
+  ]
+ },
+ {
+  "name": "Desplantes búlgaros",
+  "muscle": "Pierna",
+  "body": "inferior",
+  "measure": "reps",
+  "days": [
+   1,
+   3
+  ]
+ },
+ {
+  "name": "Hombro polea cruzada",
+  "muscle": "Hombro posterior",
+  "body": "superior",
+  "measure": "reps",
+  "days": [
+   1,
+   2
+  ]
+ }
+]

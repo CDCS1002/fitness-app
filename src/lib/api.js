@@ -143,3 +143,41 @@ export async function findByBarcode(code) {
 export async function updatePlan(id, patch) {
   return check(await supabase.from('plans').update(patch).eq('id', id).select().single());
 }
+
+// ---------------------------------------------------------------------
+// Fuerza
+// ---------------------------------------------------------------------
+export async function listExercises() {
+  return check(await supabase.from('exercises').select('*').order('name'));
+}
+
+/** Registros hasta una fecha (incluida), del más reciente al más antiguo. */
+export async function strengthUpTo(date, limit = 600) {
+  return check(
+    await supabase.from('strength_entries').select('*').lte('day', date)
+      .order('day', { ascending: false }).order('created_at', { ascending: false }).limit(limit),
+  );
+}
+
+export async function exerciseHistory(exerciseId) {
+  return check(
+    await supabase.from('strength_entries').select('*').eq('exercise_id', exerciseId).order('day', { ascending: true }),
+  );
+}
+
+export async function saveStrength(row) {
+  const { id, ...data } = row;
+  return check(
+    id
+      ? await supabase.from('strength_entries').update(data).eq('id', id).select().single()
+      : await supabase.from('strength_entries').insert(data).select().single(),
+  );
+}
+
+export async function deleteStrength(id) {
+  check(await supabase.from('strength_entries').delete().eq('id', id));
+}
+
+export async function createExercise(row) {
+  return check(await supabase.from('exercises').insert(row).select().single());
+}
