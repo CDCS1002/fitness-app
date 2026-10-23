@@ -242,9 +242,13 @@ export async function progressRange(from, to) {
     supabase.from('daily_logs').select('day,water_ml,steps,sleep_h,energy').gte('day', from).lte('day', to),
     supabase.from('activities').select('day,active_kcal').gte('day', from).lte('day', to),
     supabase.from('strength_entries').select('day,exercise_id,weight_kg,sets').gte('day', from).lte('day', to),
-    supabase.from('exercises').select('id,measure'),
+    supabase.from('exercises').select('id,name,measure,body'),
     supabase.from('body_weights').select('day,weight_kg').gte('day', from).lte('day', to),
     supabase.from('plans').select('*'),
   ]).then((rs) => rs.map(check));
   return { entries, legacy, logs, activities, strength, exercises, weights, plans };
+}
+
+export async function listPlans() {
+  return check(await supabase.from('plans').select('*').order('start_date', { ascending: false }));
 }

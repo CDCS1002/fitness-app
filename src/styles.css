@@ -327,3 +327,46 @@ legend { font-size: 13px; color: var(--muted); padding: 0 6px; }
 .energy .e-icon { font-size: 24px; filter: grayscale(.6); }
 .energy button.on { border-color: var(--accent); color: var(--text); background: color-mix(in srgb, var(--accent) 15%, var(--surface-2)); }
 .energy button.on .e-icon { filter: none; }
+
+/* ---------- Reporte para la cita ---------- */
+.tabbar { max-width: 460px; }
+.tabbar button { font-size: 10.5px; }
+textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; font: inherit; font-size: 16px; color: inherit; width: 100%; resize: vertical; }
+.visit { display: grid; gap: 12px; }
+.visit .card-head { margin-bottom: 0; }
+.report .card h2 { font-size: 17px; margin-bottom: 8px; }
+.report .card h2 small { font-weight: 400; font-size: 13px; }
+.kv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin: 10px 0 0; }
+.kv div { display: grid; gap: 2px; }
+.kv dt { font-size: 12px; color: var(--muted); }
+.kv dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.kv small { font-weight: 400; }
+.rt { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.rt th { text-align: right; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.rt td { text-align: right; padding: 8px 4px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rt th:first-child, .rt td:first-child { text-align: left; white-space: normal; }
+.rt td .dot { display: inline-block; vertical-align: middle; margin-right: 4px; }
+.rt td.good { color: var(--accent); font-weight: 600; }
+.rt td.warn { color: var(--warn); font-weight: 600; }
+.rt td.bad { color: var(--danger); font-weight: 600; }
+.rt-scroll { overflow-x: auto; margin: 0 -4px; }
+.print-only { display: none; }
+
+@media print {
+  :root, :root[data-theme] {
+    --bg: #fff; --surface: #fff; --surface-2: #f2f3f5; --line: #d9dce1; --text: #111; --muted: #5b6470;
+    --accent: #1e7a43; --warn: #9a6a00; --danger: #b3261e; color-scheme: light;
+  }
+  html, body { background: #fff; color: #111; }
+  .tabbar, .topbar, .no-print, .visit label { display: none !important; }
+  .print-only { display: block; }
+  .print-title { font-size: 20px !important; margin: 0 0 6px; }
+  .content { padding: 0; }
+  .app { max-width: none; }
+  .card { border: 1px solid var(--line); break-inside: avoid; margin-top: 10px; padding: 10px 12px; }
+  .rt { font-size: 12px; }
+  .rt td, .rt th { padding: 4px; }
+  .rt-scroll { overflow: visible; }
+  .notes-print { white-space: pre-wrap; margin: 0; }
+  @page { margin: 12mm; }
+}
