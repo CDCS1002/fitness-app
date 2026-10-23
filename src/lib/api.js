@@ -346,3 +346,69 @@ export async function lookupMedBarcode(code) {
   } catch { /* sin conexión */ }
   return { draft: null };
 }
+
+// ---------------------------------------------------------------------
+// Emociones
+// ---------------------------------------------------------------------
+export async function moodsFor(day) {
+  return check(await supabase.from('mood_entries').select('*').eq('day', day).order('at_time', { nullsFirst: false }));
+}
+
+export async function moodsRange(from, to) {
+  return check(await supabase.from('mood_entries').select('*').gte('day', from).lte('day', to).order('day'));
+}
+
+export async function saveMood(row) {
+  const { id, ...data } = row;
+  return check(
+    id
+      ? await supabase.from('mood_entries').update(data).eq('id', id).select().single()
+      : await supabase.from('mood_entries').insert(data).select().single(),
+  );
+}
+
+export async function deleteMood(id) {
+  check(await supabase.from('mood_entries').delete().eq('id', id));
+}
+
+/** Áreas propias usadas antes (además de las predeterminadas). */
+export async function usedAreas() {
+  const rows = check(await supabase.from('mood_entries').select('areas').order('created_at', { ascending: false }).limit(300));
+  return [...new Set(rows.flatMap((r) => r.areas || []))];
+}
+
+/**
+ * Contexto por día para cruzar con las emociones: sueño (y fases), energía,
+ * si entrenó (fuerza o actividad) y si las kcal quedaron dentro del rango del plan.
+ */
+export async function dayContextRange(from, to) {
+  const { dayTargets } = await import('./targets.js');
+  const { planFor } = await import('./weekly.js');
+  const [logs, acts, strength, entries, plans] = await Promise.all([
+    supabase.from('daily_logs').select('*').gte('day', from).lte('day', to),
+    supabase.from('activities').select('day,active_kcal').gte('day', from).lte('day', to),
+    supabase.from('strength_entries').select('day').gte('day', from).lte('day', to),
+    supabase.from('meal_entries').select('eaten_on,kcal').gte('eaten_on', from).lte('eaten_on', to),
+    supabase.from('plans').select('*'),
+  ]).then((rs) => rs.map(check));
+  const out = {};
+  const day = (d) => (out[d] ||= {});
+  for (const l of logs) {
+    Object.assign(day(l.day), {
+      sleepH: l.sleep_h != null ? Number(l.sleep_h) : null,
+      energy: l.energy ?? null,
+      stages: l.sleep_rem_min != null || l.sleep_deep_min != null
+        ? { awake: l.sleep_awake_min, rem: l.sleep_rem_min, core: l.sleep_core_min, deep: l.sleep_deep_min } : null,
+      steps: l.steps ?? null,
+    });
+  }
+  for (const a of acts) { const d = day(a.day); d.trained = true; d.activeKcal = (d.activeKcal || 0) + Number(a.active_kcal || 0); }
+  for (const s of strength) { const d = day(s.day); d.trained = true; d.strengthExercises = (d.strengthExercises || 0) + 1; }
+  const kcal = {};
+  for (const e of entries) kcal[e.eaten_on] = (kcal[e.eaten_on] || 0) + Number(e.kcal || 0);
+  for (const [d, k] of Object.entries(kcal)) {
+    const t = dayTargets(planFor(plans, d));
+    Object.assign(day(d), { kcal: Math.round(k), kcalInRange: k >= t.low && k <= t.high, kcalLow: t.low, kcalHigh: t.high });
+  }
+  return out;
+}

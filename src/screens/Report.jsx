@@ -14,7 +14,7 @@ const short = (iso) => fromISO(iso).toLocaleDateString('es', { day: 'numeric', m
 // Diferencia contra la meta: verde si se cumplió o se acercó (±0,5), ámbar si falta, rojo si se pasó
 const tone = (d, tol = 0.5) => (d == null ? '' : Math.abs(d) <= tol ? 'good' : d < 0 ? 'warn' : 'bad');
 
-export function Report() {
+export function Report({ onBack }) {
   const [plans, setPlans] = useState([]);
   const [planId, setPlanId] = useState(null);
   const [from, setFrom] = useState(null);
@@ -60,7 +60,7 @@ export function Report() {
 
   return (
     <div class="app report">
-      <header class="topbar"><span /><h1 class="page-title">Reporte para la cita</h1><span /></header>
+      <header class="topbar">{onBack ? <button class="link no-print" onClick={onBack}>‹ Progreso</button> : <span />}<h1 class="page-title">Reporte de nutrición</h1><span /></header>
       <main class="content">
         {error && <p class="error">{error}</p>}
 

@@ -418,3 +418,85 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 .time-chip { display: inline-flex; align-items: center; gap: 4px; }
 .time-chip input { width: auto; padding: 8px; }
 .card-head .link { white-space: nowrap; flex: none; }
+
+/* ---------- Emociones ---------- */
+.mood-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mood-action { display: grid; gap: 4px; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 12px; }
+.mood-action b { font-size: 15px; }
+.mood-action small { font-size: 12px; }
+.mood-ic { font-size: 22px; color: var(--accent); line-height: 1; }
+.day-ctx .kv small { font-size: 12px; }
+.tone { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 99px; background: var(--surface-2); }
+.tone.agradable { color: var(--accent); }
+.tone.desagradable { color: var(--danger); }
+.tone.mixto { color: var(--warn); }
+.mood-entry { width: 100%; display: flex; gap: 12px; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 12px 0; }
+.card .mood-entry:last-child { border-bottom: 0; }
+.mood-time { width: 44px; flex: none; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); padding-top: 3px; }
+.mood-body { display: grid; gap: 6px; min-width: 0; }
+.mood-emos { display: flex; flex-wrap: wrap; gap: 6px; }
+.emo-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 99px;
+  background: color-mix(in srgb, var(--c) 22%, transparent); color: var(--c); }
+.emo-chip .dots { font-style: normal; letter-spacing: -1px; font-size: 12px; opacity: .9; }
+.mood-note { font-size: 14px; color: var(--text); opacity: .85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.small { font-size: 12px; }
+
+.mood-step { display: flex; flex-direction: column; gap: 12px; }
+.mood-step > * { flex: none; }
+.mood-step .search { width: 100%; }
+.wheel { width: 100%; max-width: 330px; aspect-ratio: 1 / 1; height: auto; margin: 0 auto; display: block; touch-action: manipulation; }
+.wheel-seg { cursor: pointer; }
+.wheel-seg path { transition: fill-opacity .15s; stroke: var(--bg); stroke-width: 1; }
+.wheel-seg:active path, .wheel-seg:focus-visible path { fill-opacity: 1; }
+.wheel-seg.sel path { stroke: #fff; stroke-width: 2.5; }
+.wheel-label { fill: #14171a; font-weight: 700; pointer-events: none; }
+.wheel-label.l0 { font-size: 14px; }
+.wheel-label.l1 { font-size: 12px; }
+.wheel-label.l2 { font-size: 13px; }
+.wheel-check { fill: #fff; }
+.wheel-center circle { fill: var(--surface); stroke: var(--line); }
+.wheel-center-q { fill: var(--muted); font-size: 12px; }
+.wheel-center-name { fill: var(--text); font-size: 13px; font-weight: 700; }
+.wheel-center-back { fill: var(--accent); font-size: 11px; }
+.emo-current { display: flex; gap: 10px; align-items: center; justify-content: center; }
+.emo-current .btn { padding: 11px 16px; }
+.emo-list { list-style: none; padding: 0; margin: 0; }
+.emo-list li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
+.emo-item { flex: 1; display: flex; align-items: center; gap: 10px; text-align: left; background: none; border: 0; padding: 10px 0; min-width: 0; }
+.emo-item i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.emo-item > span:nth-child(2) { flex: 1; min-width: 0; }
+.emo-item small { display: block; font-size: 12px; }
+.info-btn { width: 28px; height: 28px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--accent); font-weight: 700; font-style: italic; font-family: Georgia, serif; }
+.info-btn.big { width: 40px; height: 40px; font-size: 17px; }
+.emo-selected { display: grid; gap: 8px; }
+.emo-sel { background: var(--surface); border-left: 4px solid var(--c); border-radius: 10px; padding: 10px 12px; display: grid; gap: 8px; }
+.emo-sel-head { display: flex; justify-content: space-between; gap: 8px; }
+.emo-sel-head small { font-size: 12px; }
+.intensity { display: flex; align-items: center; gap: 8px; }
+.intensity button { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--c); background: transparent; }
+.intensity button.on { background: var(--c); }
+.info-backdrop { position: absolute; inset: 0; z-index: 2; background: rgb(0 0 0 / .5); display: grid; place-items: center; padding: 20px; border-radius: 18px 18px 0 0; }
+.info-card { width: 100%; max-width: 380px; background: var(--bg); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 14px; padding: 16px; display: grid; gap: 8px; }
+.info-card h3 { margin: 0; font-size: 22px; }
+.info-card p { margin: 0; font-size: 15px; line-height: 1.45; }
+.info-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.info-actions .btn { padding: 10px 16px; }
+.sheet { position: relative; }
+
+/* ---------- Reportes en Progreso / reporte de psicología ---------- */
+.report-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font: inherit; cursor: pointer; }
+.report-btn > span { font-size: 22px; }
+.report-btn small { font-size: 12px; line-height: 1.3; }
+.core-bar { display: flex; height: 14px; border-radius: 99px; overflow: hidden; margin: 6px 0 8px; background: var(--surface-2); }
+.core-bar span { display: block; height: 100%; }
+.psy-day { padding: 10px 0; border-top: 1px solid var(--line); break-inside: avoid; }
+.psy-day:first-of-type { border-top: 0; }
+.psy-day-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; text-transform: capitalize; }
+.psy-day > p { margin: 2px 0 6px; }
+.psy-entry { display: grid; grid-template-columns: 44px 1fr; gap: 8px; margin-top: 6px; }
+.psy-entry p { margin: 3px 0 0; }
+.psy-note { white-space: pre-wrap; font-size: 14px; }
+@media print {
+  .emo-chip { border: 1px solid var(--line); }
+  .core-bar, .core-bar span, .stage-legend i { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

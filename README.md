@@ -24,6 +24,9 @@ supabase/seed/0010_list_foods.sql            alimentos de la lista de la nutrici
 supabase/migrations/0011_plan_2.sql          Planes 1 (24/08) y 2 (13/10) y grasa/músculo de la báscula de casa
 supabase/migrations/0012_sleep_stages_meds.sql fases del sueño, medicamentos y suplementos
 src/lib/sleep.js · src/lib/meds.js    fases del sueño; medicamentos, tomas y escáner (NIH DSLD → Open Food Facts)
+supabase/migrations/0013_moods.sql    registros emocionales (momentos con hora y resumen del día)
+src/lib/emotions.js · moodReport.js   rueda de emociones (6 base › 36 › 72) con definiciones; reporte y patrones
+src/screens/Emotions.jsx · PsychReport.jsx  pestaña Emociones; reporte de psicología (en Progreso)
 src/lib/report.js                     reporte para la cita (misma estructura que la hoja Reporte cita)
 supabase/seed/0005_progress_import.sql       peso, InBody y Diario 13–21 oct del Sheet
 src/lib/weekly.js                     resumen semanal (misma lógica que la hoja Semanal)
@@ -87,3 +90,11 @@ elegir la rutina del día; la lista trae todos sus ejercicios por grupo muscular
 deduce qué rutinas se hicieron cada día a partir de lo registrado (una sesión mixta cuenta para varias si tiene
 al menos 2 ejercicios exclusivos de cada una) y avisa qué rutina de la semana falta. La elección se guarda en el
 dispositivo; si se pierde, la rutina se deduce de los registros (`src/lib/routine.js`, `tests/routine.test.js`).
+
+## Emociones
+
+- Dos formas de registrar: **¿Cómo me siento ahora?** (momento con hora, varios por día) y **¿Cómo me sentí hoy?** (un resumen por día).
+- Paso 1: rueda por niveles (base → intermedia → específica) o búsqueda; cada emoción tiene definición (ⓘ) e intensidad 1–5.
+- Paso 2: áreas que influyen (trabajo, familia, pareja, dinero, salud, sueño, etc. y propias). Paso 3: nota y detalles opcionales (situación, pensamientos, cuerpo, qué hice).
+- Cada día muestra su contexto: sueño y fases, energía, entrenamiento y kcal frente al rango del plan.
+- Los reportes viven en **Progreso**: nutrición (el de antes) y psicología (período, distribución, palabras y áreas frecuentes, comparación de días agradables vs difíciles con ≥3 días de cada tipo, detalle por día con notas opcionales, PDF).

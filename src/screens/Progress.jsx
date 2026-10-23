@@ -5,6 +5,10 @@ import { dayTargets } from '../lib/targets.js';
 import { MAIN_METRICS, INBODY_SECTIONS, metricChange } from '../lib/inbody.js';
 import { addDays, fromISO, today } from '../lib/dates.js';
 import { InbodyForm } from '../components/InbodyForm.jsx';
+import { Report } from './Report.jsx';
+import { PsychReport } from './PsychReport.jsx';
+import { moodsRange, dayContextRange } from '../lib/api.js';
+import { buildMoodReport } from '../lib/moodReport.js';
 
 const WEEKS = 8;
 const nf = (n, d = 0) => (n == null ? '—' : new Intl.NumberFormat('es', { maximumFractionDigits: d, minimumFractionDigits: 0, useGrouping: 'always' }).format(n));
@@ -18,6 +22,7 @@ export function Progress({ onSignOut }) {
   const [plans, setPlans] = useState([]);
   const [error, setError] = useState('');
   const [sheet, setSheet] = useState(null); // 'weight' | {inbody: scan|null}
+  const [report, setReport] = useState(null); // 'nutricion' | 'psicologia'
 
   async function load() {
     setError('');
@@ -33,14 +38,25 @@ export function Progress({ onSignOut }) {
   }
   useEffect(() => { load(); }, []);
 
+  if (report === 'nutricion') return <Report onBack={() => setReport(null)} />;
+  if (report === 'psicologia') return <PsychReport onBack={() => setReport(null)} />;
+
   return (
     <div class="app">
       <header class="topbar"><span /><h1 class="page-title">Progreso</h1><span /></header>
       <main class="content">
         {error && <p class="error">{error}</p>}
+        <section class="card reports">
+          <header class="card-head"><h2>Reportes para tus citas</h2></header>
+          <div class="pair">
+            <button class="report-btn" onClick={() => setReport('nutricion')}><span aria-hidden="true">🥗</span><b>Nutrición</b><small class="muted">porciones, kcal, peso, InBody</small></button>
+            <button class="report-btn" onClick={() => setReport('psicologia')}><span aria-hidden="true">💬</span><b>Psicología</b><small class="muted">emociones, sueño, energía</small></button>
+          </div>
+        </section>
         <WeightCard weights={weights} scans={scans} onAdd={() => setSheet('weight')} />
         <WeeksCard weeks={weeks} plans={plans} />
         <InbodyCard scans={scans} onAdd={() => setSheet({ inbody: null })} onEdit={(s) => setSheet({ inbody: s })} />
+        <MoodCard onOpen={() => setReport('psicologia')} />
         <Recalc onDone={load} />
         <footer class="foot">
           {plans[0] && <span class="muted">{plans[0].name} · desde {plans[0].start_date}</span>}
@@ -334,5 +350,33 @@ function ScaleTrend({ weights }) {
       {last.fat_pct != null && <span>Grasa <b>{nf(Number(last.fat_pct), 1)} %</b>{fat != null && fat !== 0 && <small class={fat < 0 ? 'up' : 'down'}> {sign(fat)}</small>}</span>}
       {last.muscle_kg != null && <span>Músculo <b>{nf(Number(last.muscle_kg), 1)} kg</b>{mus != null && mus !== 0 && <small class={mus > 0 ? 'up' : 'down'}> {sign(mus)}</small>}</span>}
     </div>
+  );
+}
+
+/* ------------------- Emociones de los últimos 30 días ------------------- */
+function MoodCard({ onOpen }) {
+  const [rep, setRep] = useState(null);
+  useEffect(() => {
+    const to = today(), from = addDays(to, -29);
+    Promise.all([moodsRange(from, to), dayContextRange(from, to)])
+      .then(([moods, days]) => setRep(buildMoodReport({ moods, days, from, to })))
+      .catch(() => setRep(null));
+  }, []);
+  if (!rep || !rep.entries) return null;
+  const p = rep.patterns;
+  return (
+    <section class="card">
+      <header class="card-head"><h2>Emociones</h2><span class="muted">últimos 30 días</span></header>
+      <div class="core-bar" role="img" aria-label={rep.coreDist.map((c) => `${c.name} ${c.pct} %`).join(', ')}>
+        {rep.coreDist.map((c) => <span key={c.id} style={`width:${c.pct}%;background:${c.color}`} />)}
+      </div>
+      <p class="muted small">{rep.coreDist.map((c) => `${c.name} ${c.pct} %`).join(' · ')}</p>
+      {p.enough ? (
+        <p class="hint">Días agradables: sueño {p.agradable.sleepH ?? '—'} h, entrenaste {p.agradable.trainedPct}% · Días difíciles: sueño {p.desagradable.sleepH ?? '—'} h, entrenaste {p.desagradable.trainedPct}%.</p>
+      ) : (
+        <p class="muted hint">Con más días registrados verás cómo se relacionan tus emociones con el sueño, la energía y el entrenamiento.</p>
+      )}
+      <button class="link" onClick={onOpen}>Ver reporte completo</button>
+    </section>
   );
 }
