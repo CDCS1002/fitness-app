@@ -5,10 +5,12 @@ import { DEFAULT_GROUPS } from './lib/portions.js';
 import { Login } from './screens/Login.jsx';
 import { Day } from './screens/Day.jsx';
 import { Strength } from './screens/Strength.jsx';
+import { Progress } from './screens/Progress.jsx';
 
 const TABS = [
   { code: 'hoy', name: 'Hoy', icon: 'M4 5h16M4 12h16M4 19h10' },
   { code: 'fuerza', name: 'Fuerza', icon: 'M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12' },
+  { code: 'progreso', name: 'Progreso', icon: 'M4 20V10M10 20V4M16 20v-7M22 20H2' },
 ];
 
 function readTab() {
@@ -40,7 +42,9 @@ export function App() {
   if (!session) return <Login />;
   return (
     <>
-      {tab === 'fuerza' ? <Strength /> : <Day groups={groups} onSignOut={() => supabase.auth.signOut()} />}
+      {tab === 'fuerza' ? <Strength />
+        : tab === 'progreso' ? <Progress />
+        : <Day groups={groups} onSignOut={() => supabase.auth.signOut()} />}
       <nav class="tabbar" aria-label="Secciones">
         {TABS.map((t) => (
           <button key={t.code} class={tab === t.code ? 'on' : ''} aria-current={tab === t.code ? 'page' : undefined} onClick={() => go(t.code)}>

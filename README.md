@@ -15,6 +15,10 @@ supabase/migrations/0003_kcal_targets.sql    metas de kcal y macros
 supabase/migrations/0004_strength.sql        ejercicios y registros de fuerza
 supabase/seed/0004_strength_import.sql       catálogo e historial del Sheet (`node scripts/build-strength-seed.mjs`)
 src/lib/strength.js                   doble progresión, 1RM estimado y volumen
+supabase/migrations/0005_progress.sql        peso, InBody, días históricos y Post-entreno
+supabase/seed/0005_progress_import.sql       peso, InBody y Diario 13–21 oct del Sheet
+src/lib/weekly.js                     resumen semanal (misma lógica que la hoja Semanal)
+src/lib/inbody.js                     indicadores InBody, rangos y si conviene que suban o bajen
 src/lib/targets.js                    metas del día (explícitas o estimadas por porciones)
 supabase/seed/foods.json              alimentos iniciales (editar aquí)
 supabase/seed/0002_foods.sql          generado con `npm run seed`

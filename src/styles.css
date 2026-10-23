@@ -121,7 +121,7 @@ input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1
 .portion-preview { display: grid; gap: 2px; background: var(--surface); border-radius: 12px; padding: 12px 14px; margin-top: 14px; }
 .portion-preview b { font-size: 17px; }
 .portion-preview .muted { font-size: 13px; }
-.meal-pick, .seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 14px; }
+.meal-pick, .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 14px; }
 .seg { grid-template-columns: 1fr 1fr; margin: 4px 0 12px; }
 .meal-pick button, .seg button { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 4px; font-size: 14px; }
 .meal-pick button.on, .seg button.on { border-color: var(--accent); color: var(--accent); }
@@ -269,3 +269,44 @@ legend { font-size: 13px; color: var(--muted); padding: 0 6px; }
 .spark circle { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
 .history { list-style: none; padding: 0; margin: 8px 0 0; }
 .history li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+/* ---------- Progreso ---------- */
+.page-title { font-size: 19px; }
+.tabbar button { min-width: 76px; padding: 8px 10px; }
+.content > .card:first-child { margin-top: 0; }
+.line-chart { width: 100%; display: block; margin: 4px 0; }
+.line-chart polyline { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
+.line-chart circle { fill: var(--accent); }
+.line-chart circle.hollow { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+.lc-label { fill: var(--muted); font-size: 11px; }
+.as-link { background: none; border: 0; padding: 0; text-align: left; display: block; margin-bottom: 10px; }
+.week-bars { position: relative; display: flex; align-items: flex-end; gap: 10px; height: 98px; margin: 6px 0 6px; }
+.wb-range { position: absolute; left: 0; right: 0; background: color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 4px; pointer-events: none; }
+.wb { position: relative; flex: 1; max-width: 56px; display: grid; grid-template-rows: auto 62px auto; gap: 2px; justify-items: center; }
+.wb-val { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.wb-bar { width: 100%; height: 62px; display: flex; align-items: flex-end; }
+.wb-bar span { width: 100%; background: var(--warn); border-radius: 6px 6px 2px 2px; }
+.wb-bar span.ok { background: var(--accent); }
+.card-head .small { font-size: 12px; }
+.wb-label { font-size: 10px; color: var(--muted); text-align: center; white-space: nowrap; }
+.week { border-top: 1px solid var(--line); }
+.week-head { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: none; border: 0; padding: 12px 0; text-align: left; font-size: 15px; }
+.week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin: 0 0 14px; }
+.week-grid div { display: grid; gap: 2px; }
+.week-grid dt { font-size: 12px; color: var(--muted); }
+.week-grid dd { margin: 0; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.week-grid small { font-weight: 400; color: var(--muted); }
+.week-grid small.up { color: var(--accent); }
+.week-grid small.down { color: var(--danger); }
+.ib-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ib-grid > div { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; }
+.ib-grid .muted { font-size: 12px; }
+.ib-grid b { font-size: 19px; font-variant-numeric: tabular-nums; }
+.ib-grid b small { font-size: 12px; font-weight: 400; color: var(--muted); }
+.chg { font-size: 12px; font-weight: 600; }
+.chg.good { color: var(--accent); }
+.chg.bad { color: var(--danger); }
+.chg.neutral { color: var(--muted); }
+.ib-section { margin-top: 8px; }
+.ib-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.ib-row .small { font-size: 11px; }

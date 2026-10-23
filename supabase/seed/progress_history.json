@@ -1,0 +1,246 @@
+{
+ "scans": [
+  {
+   "day": "2026-06-15",
+   "metrics": {
+    "weight": 80.4,
+    "smm": 33.4,
+    "pbf": 27.4
+   },
+   "notes": "Historial (solo 3 indicadores)"
+  },
+  {
+   "day": "2026-09-28",
+   "metrics": {
+    "tbw": 43.5,
+    "protein": 12,
+    "minerals": 3.91,
+    "fat_mass": 21.8,
+    "weight": 81.2,
+    "smm": 34,
+    "ffm": 59.4,
+    "bmi": 28.1,
+    "pbf": 26.9,
+    "visceral": 9,
+    "whr": 1.01,
+    "obesity_degree": 128,
+    "score": 74,
+    "bmr": 1653,
+    "kcal_rec": 2376,
+    "smi": 8.5,
+    "target_weight": 69.9,
+    "fat_control": -11.3,
+    "muscle_control": 0,
+    "lean_arm_l": 3.67,
+    "lean_arm_l_pct": 112.9,
+    "lean_arm_r": 3.65,
+    "lean_arm_r_pct": 112.3,
+    "lean_trunk": 28.4,
+    "lean_trunk_pct": 109.8,
+    "lean_leg_l": 8.53,
+    "lean_leg_l_pct": 94.4,
+    "lean_leg_r": 8.6,
+    "lean_leg_r_pct": 95.2,
+    "fat_arm_l": 1.2,
+    "fat_arm_l_pct": 216.8,
+    "fat_arm_r": 1.3,
+    "fat_arm_r_pct": 221,
+    "fat_trunk": 12.5,
+    "fat_trunk_pct": 310.7,
+    "fat_leg_l": 2.7,
+    "fat_leg_l_pct": 166.5,
+    "fat_leg_r": 2.8,
+    "fat_leg_r_pct": 167.7
+   },
+   "notes": null
+  }
+ ],
+ "days": [
+  {
+   "day": "2026-10-13",
+   "kcal": 1908,
+   "protein": 149,
+   "carbs": 207,
+   "fat": 52,
+   "portions": {
+    "lacteo": 1,
+    "vegetal": 2,
+    "fruta": 2,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 10450,
+   "active_kcal": 643,
+   "sleep_h": 6.5,
+   "energy": 4,
+   "water_ml": 2000
+  },
+  {
+   "day": "2026-10-14",
+   "kcal": 2141,
+   "protein": 176,
+   "carbs": 246,
+   "fat": 49,
+   "portions": {
+    "lacteo": 2,
+    "vegetal": 0,
+    "fruta": 2,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 9263,
+   "active_kcal": 652,
+   "sleep_h": 6.5,
+   "energy": 3,
+   "water_ml": 2500
+  },
+  {
+   "day": "2026-10-15",
+   "kcal": 2311,
+   "protein": 183,
+   "carbs": 263,
+   "fat": 57,
+   "portions": {
+    "lacteo": 2,
+    "vegetal": 0,
+    "fruta": 2,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 8736,
+   "active_kcal": 1186,
+   "sleep_h": 7.3,
+   "energy": 5,
+   "water_ml": 3000
+  },
+  {
+   "day": "2026-10-16",
+   "kcal": 1914,
+   "protein": 124,
+   "carbs": 195,
+   "fat": 73,
+   "portions": {
+    "lacteo": 0,
+    "vegetal": 3,
+    "fruta": 2,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 15240,
+   "active_kcal": 774,
+   "sleep_h": 3.5,
+   "energy": 2,
+   "water_ml": 3000
+  },
+  {
+   "day": "2026-10-17",
+   "kcal": 2162,
+   "protein": 127,
+   "carbs": 100,
+   "fat": 137,
+   "portions": {
+    "lacteo": 1,
+    "vegetal": 1,
+    "fruta": 1,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 2818,
+   "active_kcal": 0,
+   "sleep_h": 9.5,
+   "energy": 5,
+   "water_ml": 2500
+  },
+  {
+   "day": "2026-10-18",
+   "kcal": 2038,
+   "protein": 100,
+   "carbs": 241,
+   "fat": 74,
+   "portions": {
+    "lacteo": 1,
+    "vegetal": 0,
+    "fruta": 0,
+    "carbohidrato": 9,
+    "proteina": 10,
+    "grasa": 3
+   },
+   "steps": 1884,
+   "active_kcal": 0,
+   "sleep_h": 9.1,
+   "energy": 4,
+   "water_ml": 1000
+  },
+  {
+   "day": "2026-10-19",
+   "kcal": 1905,
+   "protein": 114,
+   "carbs": 178,
+   "fat": 80,
+   "portions": {
+    "lacteo": 0,
+    "vegetal": 3,
+    "fruta": 0,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 10035,
+   "active_kcal": 967,
+   "sleep_h": 5.6,
+   "energy": 4,
+   "water_ml": 2500
+  },
+  {
+   "day": "2026-10-20",
+   "kcal": 2104,
+   "protein": 155,
+   "carbs": 208,
+   "fat": 69,
+   "portions": {
+    "lacteo": 1,
+    "vegetal": 1,
+    "fruta": 1,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 7769,
+   "active_kcal": 705,
+   "sleep_h": 6.7,
+   "energy": 4,
+   "water_ml": 2000
+  },
+  {
+   "day": "2026-10-21",
+   "kcal": 1986,
+   "protein": 151,
+   "carbs": 181,
+   "fat": 70,
+   "portions": {
+    "lacteo": 1,
+    "vegetal": 3,
+    "fruta": 2,
+    "carbohidrato": 9,
+    "proteina": 15,
+    "grasa": 3
+   },
+   "steps": 10573,
+   "active_kcal": 773,
+   "sleep_h": 6.5,
+   "energy": 4,
+   "water_ml": 2500
+  }
+ ],
+ "weights": [
+  {
+   "day": "2026-10-20",
+   "weight_kg": 78.7
+  }
+ ]
+}

@@ -191,3 +191,57 @@ export async function deleteStrength(id) {
 export async function createExercise(row) {
   return check(await supabase.from('exercises').insert(row).select().single());
 }
+
+// ---------------------------------------------------------------------
+// Progreso: peso, InBody y datos para el resumen semanal
+// ---------------------------------------------------------------------
+async function uid() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session.user.id;
+}
+
+export async function listWeights() {
+  return check(await supabase.from('body_weights').select('day,weight_kg').order('day'));
+}
+
+export async function saveWeight(day, weight_kg) {
+  return check(
+    await supabase.from('body_weights').upsert({ user_id: await uid(), day, weight_kg }, { onConflict: 'user_id,day' }).select().single(),
+  );
+}
+
+export async function deleteWeight(day) {
+  check(await supabase.from('body_weights').delete().eq('day', day));
+}
+
+export async function listInbody() {
+  return check(await supabase.from('inbody_scans').select('*').order('day'));
+}
+
+export async function saveInbody({ id, day, metrics, notes }) {
+  const row = { day, metrics, notes: notes || null };
+  return check(
+    id
+      ? await supabase.from('inbody_scans').update(row).eq('id', id).select().single()
+      : await supabase.from('inbody_scans').insert(row).select().single(),
+  );
+}
+
+export async function deleteInbody(id) {
+  check(await supabase.from('inbody_scans').delete().eq('id', id));
+}
+
+/** Todo lo necesario para el resumen semanal entre dos fechas. */
+export async function progressRange(from, to) {
+  const [entries, legacy, logs, activities, strength, exercises, weights, plans] = await Promise.all([
+    supabase.from('meal_entries').select('eaten_on,kcal,protein,carbs,fat,portions').gte('eaten_on', from).lte('eaten_on', to),
+    supabase.from('legacy_days').select('*').gte('day', from).lte('day', to),
+    supabase.from('daily_logs').select('day,water_ml,steps').gte('day', from).lte('day', to),
+    supabase.from('activities').select('day,active_kcal').gte('day', from).lte('day', to),
+    supabase.from('strength_entries').select('day,exercise_id,weight_kg,sets').gte('day', from).lte('day', to),
+    supabase.from('exercises').select('id,measure'),
+    supabase.from('body_weights').select('day,weight_kg').gte('day', from).lte('day', to),
+    supabase.from('plans').select('*'),
+  ]).then((rs) => rs.map(check));
+  return { entries, legacy, logs, activities, strength, exercises, weights, plans };
+}
