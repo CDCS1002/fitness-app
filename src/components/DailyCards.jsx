@@ -202,3 +202,83 @@ export function StepsCard({ date, plan, steps, setStepsValue }) {
     </section>
   );
 }
+
+/* ------------------------------- Sueño ------------------------------- */
+const hm = (h) => {
+  const total = Math.round((Number(h) || 0) * 60);
+  return `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, '0')} min`;
+};
+
+export function SleepCard({ date, plan, sleep, onSave }) {
+  const target = Number(plan?.sleep_target || 8);
+  const [editing, setEditing] = useState(false);
+  const [h, setH] = useState('');
+  const [m, setM] = useState('');
+
+  function start() {
+    const total = Math.round((Number(sleep) || 0) * 60);
+    setH(sleep != null ? String(Math.floor(total / 60)) : '');
+    setM(sleep != null ? String(total % 60) : '');
+    setEditing(true);
+  }
+
+  async function save(e) {
+    e.preventDefault();
+    const value = h === '' && m === '' ? null : Math.round(((Number(h) || 0) + (Number(m) || 0) / 60) * 100) / 100;
+    try { await onSave({ sleep_h: value }); setEditing(false); } catch (err) { alert(err.message); }
+  }
+
+  const pct = Math.min((sleep || 0) / target, 1);
+  const state = sleep == null ? '' : sleep >= target ? 'done' : sleep >= target - 1 ? 'near' : 'low';
+  return (
+    <section class="card">
+      <header class="card-head"><h2>Sueño</h2><span class="muted">anoche</span></header>
+      {editing ? (
+        <form class="sleep-edit" onSubmit={save}>
+          <label>Horas<input type="number" inputmode="numeric" min="0" max="24" value={h} onInput={(e) => setH(e.currentTarget.value)} autoFocus /></label>
+          <label>Minutos<input type="number" inputmode="numeric" min="0" max="59" value={m} onInput={(e) => setM(e.currentTarget.value)} /></label>
+          <button class="btn primary">Guardar</button>
+          <button type="button" class="link" onClick={() => setEditing(false)}>Cancelar</button>
+        </form>
+      ) : (
+        <button class="metric-row as-btn" onClick={start} aria-label="Editar sueño">
+          <span class="metric">🌙 <b>{sleep != null ? hm(sleep) : '—'}</b><span class="muted"> / {target} h</span></span>
+          <span class="muted">✎</span>
+        </button>
+      )}
+      <div class={`bar sleep ${state}`}><span style={`width:${pct * 100}%`} /></div>
+      <p class="muted hint">Copia el dato de Sueño del Apple Watch (tiempo dormido, no tiempo en cama).</p>
+    </section>
+  );
+}
+
+/* ------------------------------- Energía ------------------------------ */
+export const ENERGY = [
+  { v: 1, icon: '😫', label: 'Agotado' },
+  { v: 2, icon: '😕', label: 'Bajo' },
+  { v: 3, icon: '😐', label: 'Normal' },
+  { v: 4, icon: '🙂', label: 'Bien' },
+  { v: 5, icon: '😄', label: 'Excelente' },
+];
+
+export function EnergyCard({ energy, onSave }) {
+  const [busy, setBusy] = useState(false);
+  async function pick(v) {
+    setBusy(true);
+    try { await onSave({ energy: energy === v ? null : v }); } catch (err) { alert(err.message); }
+    setBusy(false);
+  }
+  return (
+    <section class="card">
+      <header class="card-head"><h2>Energía</h2><span class="muted">¿cómo te sentiste hoy?</span></header>
+      <div class="energy" role="radiogroup" aria-label="Energía del día">
+        {ENERGY.map((e) => (
+          <button key={e.v} role="radio" aria-checked={energy === e.v} class={energy === e.v ? 'on' : ''} disabled={busy} onClick={() => pick(e.v)}>
+            <span class="e-icon" aria-hidden="true">{e.icon}</span>
+            <span>{e.label}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}

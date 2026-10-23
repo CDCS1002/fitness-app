@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { listExercises, strengthUpTo } from '../lib/api.js';
 import { analyze, plannedFor, fmtKg, ACTION_LABEL } from '../lib/strength.js';
-import { addDays, fromISO, labelFor, today } from '../lib/dates.js';
+import { fromISO } from '../lib/dates.js';
+import { DayHeader } from '../components/DayHeader.jsx';
 import { ROUTINE, isoDow } from '../lib/routine.js';
 import { LogSet, ExercisePicker } from '../components/StrengthSheets.jsx';
 
 const fmtSets = (ex, sets) => sets.map(Number).join(' / ') + (ex.measure === 'segundos' ? ' s' : '');
 const int = (n) => new Intl.NumberFormat('es', { useGrouping: 'always' }).format(Math.round(n || 0));
 
-export function Strength() {
-  const [date, setDate] = useState(today());
+export function Strength({ date, setDate }) {
   const [exercises, setExercises] = useState([]);
   const [entries, setEntries] = useState([]); // hasta la fecha, del más reciente al más antiguo
   const [error, setError] = useState('');
@@ -59,14 +59,7 @@ export function Strength() {
 
   return (
     <div class="app">
-      <header class="topbar">
-        <button class="icon-btn" aria-label="Día anterior" onClick={() => setDate(addDays(date, -1))}>‹</button>
-        <button class="day-title" onClick={() => setDate(today())}>
-          <span>{labelFor(date)}</span>
-          {date !== today() && <small class="muted">volver a hoy</small>}
-        </button>
-        <button class="icon-btn" aria-label="Día siguiente" onClick={() => setDate(addDays(date, 1))}>›</button>
-      </header>
+      <DayHeader date={date} setDate={setDate} title="Fuerza" />
 
       <main class="content">
         {error && <p class="error">{error}</p>}

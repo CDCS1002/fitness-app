@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
-import { entriesFor, getPlanFor, deleteEntry, getFood, getDailyLog, activitiesFor } from '../lib/api.js';
-import { ActivityCard, WaterCard, StepsCard } from '../components/DailyCards.jsx';
+import { entriesFor, getPlanFor, deleteEntry, getFood, getDailyLog } from '../lib/api.js';
+import { WaterCard } from '../components/DailyCards.jsx';
+import { DayHeader } from '../components/DayHeader.jsx';
 import { sumRoundedPortions, describePortions } from '../lib/portions.js';
-import { addDays, labelFor, today } from '../lib/dates.js';
 import { PortionBoard } from '../components/PortionBoard.jsx';
 import { KcalMeter } from '../components/KcalMeter.jsx';
 import { AddFood, Detail } from './AddFood.jsx';
@@ -10,30 +10,24 @@ import { MEALS } from '../lib/meals.js';
 
 const n0 = (x) => Math.round(Number(x) || 0);
 
-export function Day({ groups, onSignOut }) {
-  const [date, setDate] = useState(today());
+/** Pestaña Alimentación: kcal, porciones, comidas y agua. */
+export function Day({ groups, date, setDate }) {
   const [entries, setEntries] = useState([]);
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [adding, setAdding] = useState(null); // código de comida
   const [editing, setEditing] = useState(null); // { entry, food }
-  const [activities, setActivities] = useState([]);
   const [waterMl, setWaterMl] = useState(0);
-  const [steps, setStepsValue] = useState(null);
 
   async function load() {
     setLoading(true);
     setError('');
     try {
-      const [e, p, log, acts] = await Promise.all([
-        entriesFor(date), getPlanFor(date), getDailyLog(date), activitiesFor(date),
-      ]);
+      const [e, p, log] = await Promise.all([entriesFor(date), getPlanFor(date), getDailyLog(date)]);
       setEntries(e);
       setPlan(p);
       setWaterMl(Number(log?.water_ml || 0));
-      setStepsValue(log?.steps ?? null);
-      setActivities(acts);
     } catch (err) {
       setError(err.message);
     }
@@ -71,14 +65,7 @@ export function Day({ groups, onSignOut }) {
 
   return (
     <div class="app">
-      <header class="topbar">
-        <button class="icon-btn" aria-label="Día anterior" onClick={() => setDate(addDays(date, -1))}>‹</button>
-        <button class="day-title" onClick={() => setDate(today())}>
-          <span>{labelFor(date)}</span>
-          {date !== today() && <small class="muted">volver a hoy</small>}
-        </button>
-        <button class="icon-btn" aria-label="Día siguiente" onClick={() => setDate(addDays(date, 1))}>›</button>
-      </header>
+      <DayHeader date={date} setDate={setDate} title="Alimentación" />
 
       <main class="content">
         {error && <p class="error">{error}</p>}
@@ -119,14 +106,7 @@ export function Day({ groups, onSignOut }) {
           );
         })}
 
-        <ActivityCard date={date} activities={activities} setActivities={setActivities} />
         <WaterCard date={date} plan={plan} waterMl={waterMl} setWaterMl={setWaterMl} />
-        <StepsCard date={date} plan={plan} steps={steps} setStepsValue={setStepsValue} />
-
-        <footer class="foot">
-          {plan && <span class="muted">{plan.name} · desde {plan.start_date}</span>}
-          <button class="link" onClick={onSignOut}>Cerrar sesión</button>
-        </footer>
       </main>
 
       {editing && (

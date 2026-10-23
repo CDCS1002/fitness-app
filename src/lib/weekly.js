@@ -31,7 +31,11 @@ export function buildDays({ entries = [], legacy = [], logs = [], activities = [
   const day = (iso) => (days[iso] ||= { day: iso, entries: [], activeKcal: null, strengthVolume: 0, strengthSets: 0 });
   for (const e of entries) day(e.eaten_on).entries.push(e);
   for (const l of legacy) Object.assign(day(l.day), { legacy: l });
-  for (const l of logs) Object.assign(day(l.day), { waterMl: Number(l.water_ml || 0), steps: l.steps });
+  for (const l of logs) {
+    const d = Object.assign(day(l.day), { waterMl: Number(l.water_ml || 0), steps: l.steps });
+    if (l.sleep_h != null) d.sleep = Number(l.sleep_h);
+    if (l.energy != null) d.energy = Number(l.energy);
+  }
   for (const a of activities) {
     const d = day(a.day);
     d.activeKcal = (d.activeKcal || 0) + Number(a.active_kcal || 0);
@@ -55,8 +59,8 @@ export function buildDays({ entries = [], legacy = [], logs = [], activities = [
       d.food = { kcal: +l.kcal, protein: +l.protein, carbs: +l.carbs, fat: +l.fat, portions: l.portions || {} };
     }
     if (d.activeKcal == null && d.legacy?.active_kcal != null) d.activeKcal = Number(d.legacy.active_kcal);
-    if (d.legacy?.sleep_h != null) d.sleep = Number(d.legacy.sleep_h);
-    if (d.legacy?.energy != null) d.energy = Number(d.legacy.energy);
+    if (d.sleep == null && d.legacy?.sleep_h != null) d.sleep = Number(d.legacy.sleep_h);
+    if (d.energy == null && d.legacy?.energy != null) d.energy = Number(d.legacy.energy);
   }
   return days;
 }

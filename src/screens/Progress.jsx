@@ -11,7 +11,7 @@ const nf = (n, d = 0) => (n == null ? '—' : new Intl.NumberFormat('es', { maxi
 const short = (iso) => fromISO(iso).toLocaleDateString('es', { day: 'numeric', month: 'short' });
 const sign = (n, d = 1) => (n == null ? '' : `${n > 0 ? '+' : ''}${nf(n, d)}`);
 
-export function Progress() {
+export function Progress({ onSignOut }) {
   const [weights, setWeights] = useState([]);
   const [scans, setScans] = useState([]);
   const [weeks, setWeeks] = useState([]);
@@ -41,6 +41,10 @@ export function Progress() {
         <WeightCard weights={weights} scans={scans} onAdd={() => setSheet('weight')} />
         <WeeksCard weeks={weeks} plans={plans} />
         <InbodyCard scans={scans} onAdd={() => setSheet({ inbody: null })} onEdit={(s) => setSheet({ inbody: s })} />
+        <footer class="foot">
+          {plans[0] && <span class="muted">{plans[0].name} · desde {plans[0].start_date}</span>}
+          <button class="link" onClick={onSignOut}>Cerrar sesión</button>
+        </footer>
       </main>
 
       {sheet === 'weight' && (

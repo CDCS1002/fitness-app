@@ -310,3 +310,20 @@ legend { font-size: 13px; color: var(--muted); padding: 0 6px; }
 .ib-section { margin-top: 8px; }
 .ib-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .ib-row .small { font-size: 11px; }
+
+/* ---------- Pestañas de 4 y Actividad ---------- */
+.tabbar { width: calc(100% - 24px); max-width: 420px; }
+.tabbar button { flex: 1; min-width: 0; padding: 8px 2px; font-size: 11px; }
+.tab-title { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.content > .card:first-child { margin-top: 0; }
+.sleep-edit { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin: 6px 0 10px; }
+.sleep-edit .link { grid-column: 1 / -1; justify-self: start; }
+.sleep-edit .btn { padding: 11px 14px; }
+.bar.sleep span { background: var(--g-lacteo); }
+.bar.sleep.done span { background: var(--accent); }
+.bar.sleep.low span { background: var(--warn); }
+.energy { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.energy button { display: grid; justify-items: center; gap: 4px; padding: 10px 2px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font-size: 11px; color: var(--muted); }
+.energy .e-icon { font-size: 24px; filter: grayscale(.6); }
+.energy button.on { border-color: var(--accent); color: var(--text); background: color-mix(in srgb, var(--accent) 15%, var(--surface-2)); }
+.energy button.on .e-icon { filter: none; }
