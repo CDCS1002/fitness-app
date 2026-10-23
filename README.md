@@ -17,6 +17,7 @@ supabase/seed/0004_strength_import.sql       catálogo e historial del Sheet (`n
 src/lib/strength.js                   doble progresión, 1RM estimado y volumen
 supabase/migrations/0005_progress.sql        peso, InBody, días históricos y Post-entreno
 supabase/migrations/0006_sleep_energy.sql    sueño, energía y meta de sueño
+supabase/seed/0007_generic_foods.sql         112 alimentos genéricos (USDA) y corrección de genéricos estimados
 supabase/seed/0005_progress_import.sql       peso, InBody y Diario 13–21 oct del Sheet
 src/lib/weekly.js                     resumen semanal (misma lógica que la hoja Semanal)
 src/lib/inbody.js                     indicadores InBody, rangos y si conviene que suban o bajen
