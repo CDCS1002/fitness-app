@@ -139,3 +139,7 @@ export async function findByBarcode(code) {
   const rows = check(await supabase.from('foods').select('id').in('barcode', barcodeVariants(code)).limit(1));
   return rows.length ? getFood(rows[0].id) : null;
 }
+
+export async function updatePlan(id, patch) {
+  return check(await supabase.from('plans').update(patch).eq('id', id).select().single());
+}

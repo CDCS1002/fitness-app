@@ -4,6 +4,7 @@ import { ActivityCard, WaterCard, StepsCard } from '../components/DailyCards.jsx
 import { sumRoundedPortions, describePortions } from '../lib/portions.js';
 import { addDays, labelFor, today } from '../lib/dates.js';
 import { PortionBoard } from '../components/PortionBoard.jsx';
+import { KcalMeter } from '../components/KcalMeter.jsx';
 import { AddFood } from './AddFood.jsx';
 import { MEALS } from '../lib/meals.js';
 
@@ -67,14 +68,14 @@ export function Day({ groups, onSignOut }) {
       <main class="content">
         {error && <p class="error">{error}</p>}
 
-        <PortionBoard totals={totals} targets={plan?.targets} groups={groups} />
+        <KcalMeter
+          eaten={sum('kcal')}
+          macros={{ protein: sum('protein'), carbs: sum('carbs'), fat: sum('fat') }}
+          plan={plan}
+          onPlanChange={setPlan}
+        />
 
-        <section class="macros">
-          <div><b>{n0(sum('kcal'))}</b><span>kcal</span></div>
-          <div><b>{n0(sum('protein'))}</b><span>proteína</span></div>
-          <div><b>{n0(sum('carbs'))}</b><span>carbos</span></div>
-          <div><b>{n0(sum('fat'))}</b><span>grasa</span></div>
-        </section>
+        <PortionBoard totals={totals} targets={plan?.targets} groups={groups} />
 
         {MEALS.map((meal) => {
           const list = entries.filter((e) => e.meal === meal.code);

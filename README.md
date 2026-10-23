@@ -11,6 +11,8 @@ PWA para registrar comidas por **porciones de intercambio** (proteína, carbohid
 ```
 supabase/migrations/0001_schema.sql   tablas, RLS, búsqueda (pg_trgm + unaccent)
 supabase/migrations/0002_daily_activity.sql  agua, pasos y actividad
+supabase/migrations/0003_kcal_targets.sql    metas de kcal y macros
+src/lib/targets.js                    metas del día (explícitas o estimadas por porciones)
 supabase/seed/foods.json              alimentos iniciales (editar aquí)
 supabase/seed/0002_foods.sql          generado con `npm run seed`
 src/lib/portions.js                   motor de porciones
