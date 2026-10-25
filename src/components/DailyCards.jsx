@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { addWater, setSteps, addActivity, deleteActivity } from '../lib/api.js';
 import { STAGES, hasStages, stagesSummary, stageFields, fmtMin } from '../lib/sleep.js';
 import { dayEnergy } from '../lib/energy.js';
+import { EXTRA_SECTIONS } from '../lib/meals.js';
+
+const WATER = EXTRA_SECTIONS.find((s) => s.code === 'agua');
 import { ACTIVITY_KINDS, kindOf, GLASS_ML, isTrainingDay, waterTarget } from '../lib/activity.js';
 
 const n0 = (x) => Math.round(Number(x) || 0);
@@ -208,9 +211,10 @@ export function WaterCard({ date, plan, waterMl, setWaterMl }) {
 
   const pct = Math.min(waterMl / target, 1);
   return (
-    <section class="card">
-      <header class="card-head">
-        <h2>Agua</h2>
+    <section class="meal meal-card water" style={`--c:${WATER.color}`}>
+      <header>
+        <span class="meal-ic" aria-hidden="true">{WATER.icon}</span>
+        <h2>{WATER.name}</h2>
         <span class="muted">{isTrainingDay(date, plan) ? 'Día de entreno' : 'Día de descanso'}</span>
       </header>
       <div class="metric-row">

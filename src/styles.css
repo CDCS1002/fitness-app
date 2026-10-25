@@ -546,3 +546,11 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 /* Medicamentos y suplementos con el mismo formato que las comidas */
 .meds.meal-card .med-row:first-of-type { margin-top: 6px; border-top: 1px solid var(--line); }
 .meds.meal-card h2 { font-size: 18px; line-height: 1.2; }
+
+/* Agua con el mismo formato que las comidas (siempre abierta) */
+.water.meal-card { padding-bottom: 12px; }
+.water.meal-card > header { grid-template-columns: auto 1fr; }
+.water.meal-card .metric-row { margin-top: 8px; }
+.water.meal-card .bar span { background: var(--c) !important; }
+.water.meal-card .pair { margin-top: 10px; }
+.water.meal-card .wide-btn { background: color-mix(in srgb, var(--c) 16%, var(--surface-2)); }
