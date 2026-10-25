@@ -13,7 +13,7 @@ export const DEFAULT_PLAN = {
 };
 
 const FOOD_COLS =
-  'id,name,brand,barcode,state,category,primary_group,protein_source,kcal,protein,carbs,fat,fiber,portions_override,source,verified';
+  'id,name,brand,barcode,state,category,primary_group,protein_source,kcal,protein,carbs,fat,fiber,portions_override,source,verified,created_by';
 
 function check({ data, error }) {
   if (error) throw new Error(error.message);
@@ -111,6 +111,42 @@ export async function createFood(food, measures = []) {
     check(await supabase.from('food_measures').insert(measures.map((m) => ({ ...m, food_id: created.id }))));
   }
   return getFood(created.id);
+}
+
+let cachedUserId = null;
+export async function currentUserId() {
+  if (cachedUserId) return cachedUserId;
+  const { data: { session } } = await supabase.auth.getSession();
+  cachedUserId = session?.user?.id || null;
+  return cachedUserId;
+}
+
+/**
+ * Corrige un alimento creado por el usuario: datos, medidas y registros hechos con él.
+ * @param food      alimento como estaba (con measures)
+ * @param fields    columnas nuevas de foods
+ * @param measures  medidas nuevas ({ id?, label, grams, is_default })
+ * @returns { food, updated } alimento recargado y cuántos registros se recalcularon
+ */
+export async function updateFood(food, fields, measures, groups) {
+  const { entryPatches } = await import('./foodEdit.js');
+  check(await supabase.from('foods').update(fields).eq('id', food.id));
+  const keep = new Set(measures.filter((m) => m.id).map((m) => m.id));
+  const removed = food.measures.filter((m) => !keep.has(m.id)).map((m) => m.id);
+  if (removed.length) check(await supabase.from('food_measures').delete().in('id', removed));
+  for (const m of measures.filter((x) => x.id)) {
+    check(await supabase.from('food_measures').update({ label: m.label, grams: m.grams, is_default: m.is_default }).eq('id', m.id));
+  }
+  const added = measures.filter((m) => !m.id);
+  if (added.length) {
+    check(await supabase.from('food_measures').insert(added.map((m) => ({ food_id: food.id, label: m.label, grams: m.grams, is_default: m.is_default }))));
+  }
+  const fresh = await getFood(food.id);
+  const entries = check(await supabase.from('meal_entries')
+    .select('id,measure_label,quantity,grams,kcal,protein,carbs,fat,fiber,portions,food_name,food_brand').eq('food_id', food.id));
+  const patches = entryPatches(entries, food.measures, measures, fresh, groups);
+  for (const { id, patch } of patches) check(await supabase.from('meal_entries').update(patch).eq('id', id));
+  return { food: fresh, updated: patches.length };
 }
 
 // ---------------------------------------------------------------------

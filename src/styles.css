@@ -87,6 +87,29 @@ input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1
 .meal h2 { font-size: 17px; }
 .meal > header .muted { grid-row: 2; font-size: 13px; }
 .add-btn { grid-row: 1 / span 2; grid-column: 2; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--accent); font-size: 22px; line-height: 1; }
+
+/* Comidas en Alimentación: tarjeta con ícono y color propio */
+.meal[id] { background: var(--surface); border-radius: var(--radius); border-left: 5px solid var(--c); padding: 12px 12px 6px 12px; margin-top: 14px; scroll-margin-top: 150px; }
+.meal[id] > header { grid-template-columns: auto 1fr auto; border-bottom: 0; padding-bottom: 4px; }
+.meal[id] .meal-ic { grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: color-mix(in srgb, var(--c) 22%, transparent); }
+.meal[id] h2 { font-size: 19px; font-weight: 800; color: var(--text); grid-column: 2; }
+.meal[id] > header .muted { grid-column: 2; grid-row: 2; }
+.meal[id] .add-btn { grid-column: 3; background: color-mix(in srgb, var(--c) 20%, var(--surface-2)); color: var(--text); width: 42px; height: 42px; }
+.meal[id] .entry { border-top: 1px solid var(--line); }
+.meal[id] .entry:first-of-type { margin-top: 6px; }
+.meal.empty-meal { padding-bottom: 10px; opacity: .92; }
+.meal.empty-meal h2 { font-size: 17px; }
+.sec-anchor { scroll-margin-top: 150px; }
+.sec-anchor > .card { margin-top: 14px; }
+
+/* Accesos rápidos bajo el encabezado */
+.topbar { flex-wrap: wrap; }
+.topbar-extra { flex-basis: 100%; min-width: 0; }
+.jump { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 2px; scrollbar-width: none; }
+.jump::-webkit-scrollbar { display: none; }
+.jump a { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 99px; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; background: var(--surface); border: 1px solid color-mix(in srgb, var(--c) 45%, var(--line)); }
+.jump a.has { background: color-mix(in srgb, var(--c) 18%, var(--surface)); }
+.jump a i { font-style: normal; font-size: 11px; min-width: 16px; height: 16px; border-radius: 99px; display: inline-grid; place-items: center; background: var(--c); color: #111; }
 .entry, .result {
   width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; background: none; border: 0;
   border-bottom: 1px solid var(--line); padding: 12px 0;
@@ -512,3 +535,10 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 .balance-line .up b { color: var(--accent); }
 .balance-line .down b { color: var(--warn); }
 .week-grid .wide { grid-column: 1 / -1; }
+
+/* ---------- Editar alimento ---------- */
+.food-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.food-title-row .link { flex: none; white-space: nowrap; padding-top: 4px; }
+.measure-row { display: grid; grid-template-columns: 28px 1fr 84px auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+.def-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); background: none; padding: 0; }
+.def-dot.on { border-color: var(--accent); background: radial-gradient(var(--accent) 45%, transparent 50%); }

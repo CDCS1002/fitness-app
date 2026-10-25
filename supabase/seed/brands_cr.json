@@ -1,0 +1,41 @@
+{
+  "_note": "Productos de marca con su etiqueta (valores POR PORCIÓN, el script los pasa a 100 g). source 'etiqueta' = tomado de la etiqueta publicada; 'estimado' = valores de referencia de otra región, a confirmar con el empaque.",
+  "foods": [
+    { "name": "Barra de proteína de grillo chocolate amargo", "brand": "Gricket House", "category": "Barras de proteína de grillo (cricket)", "primary_group": "proteina",
+      "serving": { "label": "barra", "grams": 50 }, "kcal": 185, "protein": 20, "carbs": 11, "fat": 7, "fiber": 3, "source": "etiqueta",
+      "ref": "https://www.etiqueteando.com/shop/galletas-y-barritas/barritas/gricket-house-barra-de-proteina-sabor-chocolate-amargo/" },
+    { "name": "Barra de proteína de grillo chocolate blanco", "brand": "Gricket House", "category": "Barras de proteína de grillo (cricket)", "primary_group": "proteina",
+      "serving": { "label": "barra", "grams": 50 }, "kcal": 174, "protein": 20, "carbs": 11, "fat": 7, "fiber": 3, "source": "etiqueta",
+      "ref": "https://www.etiqueteando.com/shop/galletas-y-barritas/barritas/gricket-house-barra-de-proteina-sabor-chocolate-blanco/" },
+    { "name": "Barra de proteína de grillo piña colada", "brand": "Gricket House", "category": "Barras de proteína de grillo (cricket)", "primary_group": "proteina",
+      "serving": { "label": "barra", "grams": 60 }, "kcal": 220, "protein": 20, "carbs": 20, "fat": 6, "fiber": 10, "source": "etiqueta",
+      "ref": "https://www.etiqueteando.com/shop/galletas-y-barritas/barritas/gricket-house-barra-de-proteina-sabor-pina-colada/" },
+
+    { "name": "Fórmula 1 batido nutricional vainilla", "brand": "Herbalife", "category": "Suplementos", "primary_group": "proteina",
+      "serving": { "label": "2 cucharadas", "grams": 25 }, "kcal": 95, "protein": 9, "carbs": 13, "fat": 0.75, "fiber": null, "source": "estimado",
+      "ref": "https://www.fatsecret.com.mx/calor%C3%ADas-nutrici%C3%B3n/herbalife/formula-1-sabor-vainilla/2-cucharadas" },
+    { "name": "Proteína en polvo personalizada (PPP)", "brand": "Herbalife", "category": "Suplementos", "primary_group": "proteina",
+      "serving": { "label": "medida", "grams": 6 }, "kcal": 22, "protein": 5, "carbs": 0.1, "fat": 0.2, "fiber": null, "source": "estimado",
+      "ref": "https://www.fatsecret.com.mx/calor%C3%ADas-nutrici%C3%B3n/herbalife/personalized-protein-powder/1-porci%C3%B3n" },
+    { "name": "Barra con proteína vainilla con almendras", "brand": "Herbalife", "category": "Barras de proteína", "primary_group": "proteina",
+      "serving": { "label": "barra", "grams": 35 }, "kcal": 140, "protein": 10, "carbs": 16, "fat": 4, "fiber": null, "source": "estimado",
+      "ref": "https://www.fatsecret.com.mx/calor%C3%ADas-nutrici%C3%B3n/herbalife/barra-con-prote%C3%ADna-sabor-vainilla-con-almendras/1-barra" },
+
+    { "name": "Salsa Lizano", "brand": "Lizano", "category": "Salsas y aderezos", "primary_group": "azucar",
+      "serving": { "label": "cucharada (15 ml)", "grams": 16 }, "kcal": 15, "protein": 0, "carbs": 3, "fat": 0, "fiber": null, "source": "etiqueta",
+      "ref": "https://www.kroger.com/p/lizano-salsa-sauce/0004100036640" },
+
+    { "name": "Energy", "brand": "Rooster", "category": "Bebidas", "primary_group": "carbohidrato",
+      "serving": { "label": "lata (300 ml)", "grams": 300 }, "kcal": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": null, "source": "etiqueta",
+      "ref": "https://www.drinkrooster.com/" },
+    { "name": "Energy + Hydration", "brand": "Rooster", "category": "Bebidas", "primary_group": "carbohidrato",
+      "serving": { "label": "botella (600 ml)", "grams": 600 }, "kcal": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": null, "source": "etiqueta",
+      "ref": "https://www.drinkrooster.com/" },
+    { "name": "Energy Tea", "brand": "Rooster", "category": "Bebidas", "primary_group": "carbohidrato",
+      "serving": { "label": "botella (600 ml)", "grams": 600 }, "kcal": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": null, "source": "etiqueta",
+      "ref": "https://www.drinkrooster.com/" },
+    { "name": "Performance Water", "brand": "Rooster", "category": "Bebidas", "primary_group": "carbohidrato",
+      "serving": { "label": "botella (600 ml)", "grams": 600 }, "kcal": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": null, "source": "etiqueta",
+      "ref": "https://www.drinkrooster.com/" }
+  ]
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { searchFoods, recentFoods, getFood, addEntry, updateEntry, findByBarcode } from '../lib/api.js';
+import { searchFoods, recentFoods, getFood, addEntry, updateEntry, findByBarcode, currentUserId } from '../lib/api.js';
+import { canEditFood } from '../lib/foodEdit.js';
 import { fetchOFF, mapOFF } from '../lib/off.js';
 import { Scanner } from '../components/Scanner.jsx';
 import { macrosFor, portionsFor, describePortions, subtypeFor } from '../lib/portions.js';
@@ -9,7 +10,7 @@ import { MEALS } from '../lib/meals.js';
 const n0 = (x) => Math.round(Number(x) || 0);
 const n1 = (x) => Math.round((Number(x) || 0) * 10) / 10;
 
-export function AddFood({ date, meal, groups, onClose, onAdded }) {
+export function AddFood({ date, meal, groups, onClose, onAdded, onFoodEdited }) {
   const [step, setStep] = useState('search');
   const [food, setFood] = useState(null);
   const [query, setQuery] = useState('');
@@ -75,7 +76,12 @@ export function AddFood({ date, meal, groups, onClose, onAdded }) {
           </div>
         )}
         {step === 'detail' && food && (
-          <Detail food={food} date={date} meal={meal} groups={groups} onBack={() => setStep('search')} onAdded={onAdded} />
+          <Detail food={food} date={date} meal={meal} groups={groups} onBack={() => setStep('search')} onAdded={onAdded}
+            onEditFood={() => setStep('editfood')} />
+        )}
+        {step === 'editfood' && food && (
+          <NewFood food={food} groups={groups} onBack={() => setStep('detail')}
+            onSaved={({ food: f }) => { setFood(f); setStep('detail'); onFoodEdited?.(); }} />
         )}
         {step === 'new' && (
           <NewFood
@@ -160,7 +166,7 @@ function Search({ query, setQuery, onPick, onNew, onScan, onClose }) {
  * Cantidad, medida y tiempo de comida de un alimento. Con `entry` edita un
  * registro existente en vez de crear uno nuevo.
  */
-export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded, entry, onDelete }) {
+export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded, entry, onDelete, onEditFood }) {
   const def = food.measures.find((m) => m.is_default) || food.measures[0];
   const fromEntry = entry && (entry.measure_label === 'g' ? 'g' : food.measures.find((m) => m.label === entry.measure_label)?.id);
   const initialId = entry ? fromEntry || 'g' : def ? def.id : 'g';
@@ -171,6 +177,9 @@ export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded,
   );
   const [meal, setMeal] = useState(initialMeal);
   const [busy, setBusy] = useState(false);
+  const [userId, setUserId] = useState(null);
+  useEffect(() => { currentUserId().then(setUserId).catch(() => {}); }, []);
+  const editable = onEditFood && canEditFood(food, userId);
 
   function changeMeasure(id) {
     setMeasureId(id);
@@ -205,7 +214,10 @@ export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded,
         {entry ? <b>Editar registro</b> : <span />}
       </header>
       <div class="sheet-body">
-        <h2 class="food-title">{food.name}{food.state && <span class="muted"> ({food.state})</span>}</h2>
+        <div class="food-title-row">
+          <h2 class="food-title">{food.name}{food.state && <span class="muted"> ({food.state})</span>}</h2>
+          {editable && <button class="link" onClick={onEditFood}>✎ Editar alimento</button>}
+        </div>
         <p class="muted">
           {[food.brand, [groups[food.primary_group]?.name, food.source !== 'lista' && subtypeFor(food)].filter(Boolean).join(' ')].filter(Boolean).join(' · ')}
           {food.source === 'estimado' && !food.verified && <span class="tag">valores estimados</span>}
@@ -242,7 +254,7 @@ export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded,
         <div class="meal-pick" role="radiogroup" aria-label="Tiempo de comida">
           {MEALS.map((x) => (
             <button key={x.code} role="radio" aria-checked={meal === x.code}
-              class={meal === x.code ? 'on' : ''} onClick={() => setMeal(x.code)}>{x.name}</button>
+              class={meal === x.code ? 'on' : ''} onClick={() => setMeal(x.code)}><span aria-hidden="true">{x.icon}</span> {x.name}</button>
           ))}
         </div>
 

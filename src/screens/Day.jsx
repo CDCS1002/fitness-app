@@ -8,7 +8,8 @@ import { PortionBoard } from '../components/PortionBoard.jsx';
 import { KcalMeter } from '../components/KcalMeter.jsx';
 import { dayEnergy, balanceLabel, bmrFor } from '../lib/energy.js';
 import { AddFood, Detail } from './AddFood.jsx';
-import { MEALS } from '../lib/meals.js';
+import { NewFood } from './NewFood.jsx';
+import { MEALS, EXTRA_SECTIONS } from '../lib/meals.js';
 
 const n0 = (x) => Math.round(Number(x) || 0);
 
@@ -71,7 +72,19 @@ export function Day({ groups, date, setDate }) {
 
   return (
     <div class="app">
-      <DayHeader date={date} setDate={setDate} title="Alimentación" />
+      <DayHeader date={date} setDate={setDate} title="Alimentación">
+        <nav class="jump" aria-label="Ir a una sección">
+          {[...MEALS, ...EXTRA_SECTIONS].map((s) => {
+            const n = entries.filter((e) => e.meal === s.code).length;
+            return (
+              <a key={s.code} href={`#sec-${s.code}`} style={`--c:${s.color}`} class={n ? 'has' : ''}
+                onClick={(ev) => { ev.preventDefault(); document.getElementById(`sec-${s.code}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
+                <span aria-hidden="true">{s.icon}</span>{s.short}{n > 0 && <i>{n}</i>}
+              </a>
+            );
+          })}
+        </nav>
+      </DayHeader>
 
       <main class="content">
         {error && <p class="error">{error}</p>}
@@ -90,10 +103,11 @@ export function Day({ groups, date, setDate }) {
           const list = entries.filter((e) => e.meal === meal.code);
           const kcal = list.reduce((a, e) => a + Number(e.kcal), 0);
           return (
-            <section class="meal" key={meal.code}>
+            <section class={`meal ${list.length ? '' : 'empty-meal'}`} key={meal.code} id={`sec-${meal.code}`} style={`--c:${meal.color}`}>
               <header>
+                <span class="meal-ic" aria-hidden="true">{meal.icon}</span>
                 <h2>{meal.name}</h2>
-                {list.length > 0 && <span class="muted">{n0(kcal)} kcal · {describePortions(sumRoundedPortions(list), groups)}</span>}
+                <span class="muted">{list.length ? `${n0(kcal)} kcal · ${describePortions(sumRoundedPortions(list), groups)}` : loading ? '' : 'Sin registros'}</span>
                 <button class="add-btn" aria-label={`Agregar a ${meal.name}`} onClick={() => setAdding(meal.code)}>+</button>
               </header>
               {list.map((e) => (
@@ -108,19 +122,23 @@ export function Day({ groups, date, setDate }) {
                   </span>
                 </button>
               ))}
-              {!loading && list.length === 0 && <p class="empty muted">Sin registros</p>}
             </section>
           );
         })}
 
-        <WaterCard date={date} plan={plan} waterMl={waterMl} setWaterMl={setWaterMl} />
-        <MedsCard date={date} />
+        <div id="sec-meds" class="sec-anchor"><MedsCard date={date} /></div>
+        <div id="sec-agua" class="sec-anchor"><WaterCard date={date} plan={plan} waterMl={waterMl} setWaterMl={setWaterMl} /></div>
       </main>
 
       {editing && (
         <div class="sheet-backdrop" onClick={(ev) => ev.target === ev.currentTarget && setEditing(null)}>
           <div class="sheet" role="dialog" aria-modal="true">
+            {editing.mode === 'food' ? (
+              <NewFood food={editing.food} groups={groups} onBack={() => setEditing({ ...editing, mode: null })}
+                onSaved={async () => { await load(); setEditing(null); }} />
+            ) : (
             <Detail
+              onEditFood={() => setEditing({ ...editing, mode: 'food' })}
               food={editing.food}
               entry={editing.entry}
               date={date}
@@ -130,6 +148,7 @@ export function Day({ groups, date, setDate }) {
               onDelete={() => remove(editing.entry)}
               onAdded={(row) => { setEntries((l) => l.map((x) => (x.id === row.id ? row : x))); setEditing(null); }}
             />
+            )}
           </div>
         </div>
       )}
@@ -141,6 +160,7 @@ export function Day({ groups, date, setDate }) {
           groups={groups}
           onClose={() => setAdding(null)}
           onAdded={(entry) => { setEntries((l) => [...l, entry]); setAdding(null); }}
+          onFoodEdited={load}
         />
       )}
     </div>
