@@ -4,6 +4,9 @@ import { KINDS, FORMS, kindOf, medsForDay, doseLabel, ingredientsLabel } from '.
 import { DAY_NAMES } from '../lib/routine.js';
 import { today } from '../lib/dates.js';
 import { Scanner } from './Scanner.jsx';
+import { EXTRA_SECTIONS } from '../lib/meals.js';
+
+const SECTION = EXTRA_SECTIONS.find((s) => s.code === 'meds');
 
 const nowHM = () => new Date().toTimeString().slice(0, 5);
 const hm = (t) => (t ? String(t).slice(0, 5) : '');
@@ -25,6 +28,10 @@ export function MedsCard({ date }) {
   }, [date]);
 
   const rows = medsForDay(meds, logs, date);
+  const plannedTotal = rows.reduce((a, r) => a + r.planned, 0);
+  const takenTotal = rows.reduce((a, r) => a + Math.min(r.taken.length, r.planned || r.taken.length), 0);
+  const summary = !rows.length ? 'Nada programado para este día'
+    : plannedTotal ? `${takenTotal} de ${plannedTotal} ${plannedTotal === 1 ? 'toma' : 'tomas'}` : `${takenTotal} ${takenTotal === 1 ? 'toma' : 'tomas'}`;
 
   async function take(med) {
     try {
@@ -43,13 +50,14 @@ export function MedsCard({ date }) {
   }
 
   return (
-    <section class="card meds">
-      <header class="card-head">
-        <h2>Medicamentos y suplementos</h2>
-        <button class="link" onClick={() => setSheet('add')}>+ Agregar</button>
+    <section class={`meal meal-card meds ${rows.length ? '' : 'empty-meal'}`} style={`--c:${SECTION.color}`}>
+      <header>
+        <span class="meal-ic" aria-hidden="true">{SECTION.icon}</span>
+        <h2>{SECTION.name}</h2>
+        <span class="muted">{error ? '' : summary}</span>
+        <button class="add-btn" aria-label="Agregar medicamento o suplemento" onClick={() => setSheet('add')}>+</button>
       </header>
       {error && <p class="muted hint">{error}</p>}
-      {!error && rows.length === 0 && <p class="muted empty">Nada programado para este día.</p>}
       {rows.map(({ med, planned, taken }) => {
         const k = kindOf(med.kind);
         const done = planned > 0 && taken.length >= planned;

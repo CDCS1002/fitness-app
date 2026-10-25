@@ -89,14 +89,14 @@ input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1
 .add-btn { grid-row: 1 / span 2; grid-column: 2; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--accent); font-size: 22px; line-height: 1; }
 
 /* Comidas en Alimentación: tarjeta con ícono y color propio */
-.meal[id] { background: var(--surface); border-radius: var(--radius); border-left: 5px solid var(--c); padding: 12px 12px 6px 12px; margin-top: 14px; scroll-margin-top: 150px; }
-.meal[id] > header { grid-template-columns: auto 1fr auto; border-bottom: 0; padding-bottom: 4px; }
-.meal[id] .meal-ic { grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: color-mix(in srgb, var(--c) 22%, transparent); }
-.meal[id] h2 { font-size: 19px; font-weight: 800; color: var(--text); grid-column: 2; }
-.meal[id] > header .muted { grid-column: 2; grid-row: 2; }
-.meal[id] .add-btn { grid-column: 3; background: color-mix(in srgb, var(--c) 20%, var(--surface-2)); color: var(--text); width: 42px; height: 42px; }
-.meal[id] .entry { border-top: 1px solid var(--line); }
-.meal[id] .entry:first-of-type { margin-top: 6px; }
+.meal-card { background: var(--surface); border-radius: var(--radius); border-left: 5px solid var(--c); padding: 12px 12px 6px 12px; margin-top: 14px; scroll-margin-top: 150px; }
+.meal-card > header { grid-template-columns: auto 1fr auto; border-bottom: 0; padding-bottom: 4px; }
+.meal-card .meal-ic { grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: color-mix(in srgb, var(--c) 22%, transparent); }
+.meal-card h2 { font-size: 19px; font-weight: 800; color: var(--text); grid-column: 2; }
+.meal-card > header .muted { grid-column: 2; grid-row: 2; }
+.meal-card .add-btn { grid-column: 3; background: color-mix(in srgb, var(--c) 20%, var(--surface-2)); color: var(--text); width: 42px; height: 42px; }
+.meal-card .entry { border-top: 1px solid var(--line); }
+.meal-card .entry:first-of-type { margin-top: 6px; }
 .meal.empty-meal { padding-bottom: 10px; opacity: .92; }
 .meal.empty-meal h2 { font-size: 17px; }
 .sec-anchor { scroll-margin-top: 150px; }
@@ -429,7 +429,7 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 
 /* ---------- Medicamentos y suplementos ---------- */
 .med-row { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); padding: 8px 0; }
-.card .med-row:last-of-type { border-bottom: 0; }
+.card .med-row:last-of-type, .meds .med-row:last-of-type { border-bottom: 0; }
 .med-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 0; text-align: left; }
 .med-takes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 50%; }
 .take { border: 1px solid var(--line); background: var(--surface-2); border-radius: 99px; padding: 7px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -542,3 +542,7 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 .measure-row { display: grid; grid-template-columns: 28px 1fr 84px auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
 .def-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); background: none; padding: 0; }
 .def-dot.on { border-color: var(--accent); background: radial-gradient(var(--accent) 45%, transparent 50%); }
+
+/* Medicamentos y suplementos con el mismo formato que las comidas */
+.meds.meal-card .med-row:first-of-type { margin-top: 6px; border-top: 1px solid var(--line); }
+.meds.meal-card h2 { font-size: 18px; line-height: 1.2; }

@@ -103,7 +103,7 @@ export function Day({ groups, date, setDate }) {
           const list = entries.filter((e) => e.meal === meal.code);
           const kcal = list.reduce((a, e) => a + Number(e.kcal), 0);
           return (
-            <section class={`meal ${list.length ? '' : 'empty-meal'}`} key={meal.code} id={`sec-${meal.code}`} style={`--c:${meal.color}`}>
+            <section class={`meal meal-card ${list.length ? '' : 'empty-meal'}`} key={meal.code} id={`sec-${meal.code}`} style={`--c:${meal.color}`}>
               <header>
                 <span class="meal-ic" aria-hidden="true">{meal.icon}</span>
                 <h2>{meal.name}</h2>
