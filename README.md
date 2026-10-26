@@ -24,6 +24,7 @@ supabase/seed/0010_list_foods.sql            alimentos de la lista de la nutrici
 supabase/migrations/0011_plan_2.sql          Planes 1 (24/08) y 2 (13/10) y grasa/músculo de la báscula de casa
 supabase/migrations/0012_sleep_stages_meds.sql fases del sueño, medicamentos y suplementos
 src/lib/sleep.js · src/lib/meds.js    fases del sueño; medicamentos, tomas y escáner (NIH DSLD → Open Food Facts)
+supabase/seed/0019_meats_legumes.sql  cortes de carne cocidos y cubaces (scripts/build-meats-seed.mjs)
 supabase/seed/0016_brands_cr.sql      productos de marca (Gricket House, Herbalife, Lizano, Rooster) con su fuente
 supabase/seed/0015_juices_soups.sql   jugos naturales y cremas de vegetales caseras (scripts/build-juices-soups-seed.mjs)
 supabase/migrations/0014_total_kcal.sql kcal activas del día del reloj (+ historial del Sheet)
