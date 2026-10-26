@@ -9,9 +9,9 @@ import { macrosFor, portionsFor } from './portions.js';
 
 const r2 = (n) => (n == null ? null : Math.round(n * 100) / 100);
 
-/** Puede editarse: lo creó el usuario a mano (no viene de Open Food Facts ni de las bases cargadas). */
-export function canEditFood(food, userId) {
-  return !!food && !!userId && food.created_by === userId && food.source !== 'openfoodfacts';
+/** El catálogo de alimentos es común: solo el administrador corrige alimentos. */
+export function canEditFood(food, isAdmin) {
+  return !!food && !!isAdmin;
 }
 
 /**

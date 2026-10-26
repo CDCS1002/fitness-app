@@ -29,9 +29,8 @@ test('renombrar una medida actualiza el nombre en el registro', () => {
   assert.equal(p.patch.grams, 60);
 });
 
-test('solo se editan alimentos propios creados a mano', () => {
-  assert.equal(canEditFood({ created_by: 'u1', source: 'etiqueta' }, 'u1'), true);
-  assert.equal(canEditFood({ created_by: 'u1', source: 'openfoodfacts' }, 'u1'), false);
-  assert.equal(canEditFood({ created_by: null, source: 'tabla' }, 'u1'), false);
-  assert.equal(canEditFood({ created_by: 'u2', source: 'etiqueta' }, 'u1'), false);
+test('solo el administrador corrige alimentos del catálogo común', () => {
+  assert.equal(canEditFood({ created_by: 'u1', source: 'etiqueta' }, true), true);
+  assert.equal(canEditFood({ created_by: null, source: 'tabla' }, true), true);
+  assert.equal(canEditFood({ created_by: 'u2', source: 'openfoodfacts' }, false), false);
 });

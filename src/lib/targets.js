@@ -6,19 +6,25 @@
  * 45 kcal (7 P · 2 G), harina 80 (15 C · 3 P · 1 G), grasa 45 (5 G), lácteo descremado
  * 100 (12 C · 8 P · ~1,5 G), vegetal 25 (5 C · 2 P), fruta 60 (15 C).
  */
-export const KCAL_PER_PORTION = {
-  proteina:     { kcal: 45,  protein: 7, carbs: 0,  fat: 2 },
-  carbohidrato: { kcal: 80,  protein: 3, carbs: 15, fat: 1 },
-  grasa:        { kcal: 45,  protein: 0, carbs: 0,  fat: 5 },
-  lacteo:       { kcal: 100, protein: 8, carbs: 12, fat: 1.5 },
-  vegetal:      { kcal: 25,  protein: 2, carbs: 5,  fat: 0 },
-  fruta:        { kcal: 60,  protein: 0, carbs: 15, fat: 0 },
-};
+import { DEFAULT_GROUPS } from './portions.js';
 
-export function estimateFromPortions(targets = {}) {
+// Valores por porción de la lista de la nutricionista: vienen de exchange_groups
+// (portion_kcal, portion_protein…). DEFAULT_GROUPS solo cubre el arranque sin conexión.
+const fromGroups = (groups) => Object.fromEntries(Object.entries(groups)
+  .filter(([, g]) => g.portion_kcal != null)
+  .map(([code, g]) => [code, { kcal: Number(g.portion_kcal), protein: Number(g.portion_protein || 0), carbs: Number(g.portion_carbs || 0), fat: Number(g.portion_fat || 0) }]));
+let PORTION_VALUES = fromGroups(DEFAULT_GROUPS);
+
+/** Actualiza los valores por porción con los grupos cargados de la base. */
+export function setPortionValues(groups) {
+  const v = fromGroups(groups || {});
+  if (Object.keys(v).length) PORTION_VALUES = v;
+}
+
+export function estimateFromPortions(targets = {}, values = PORTION_VALUES) {
   const out = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
   for (const [g, n] of Object.entries(targets)) {
-    const v = KCAL_PER_PORTION[g];
+    const v = values[g];
     if (!v) continue;
     for (const k of Object.keys(out)) out[k] += v[k] * Number(n || 0);
   }

@@ -8,18 +8,34 @@
  *  - Marca: 1RM estimado (Epley) con la mejor serie; en isométricos, la mejor serie.
  *  - Volumen: peso × total de reps (no aplica a isométricos).
  */
-export const PROGRESSION = {
+/** Reglas por defecto para un usuario nuevo; las de cada usuario viven en strength_settings. */
+export const DEFAULT_PROGRESSION = {
   reps: { min: 6, max: 10 },
   segundos: { min: 30, max: 90 },
   step: { inferior: 5, superior: 2.5, core: 2.5, isometrico: 2.5 },
 };
 
+/** Reglas a partir de la fila de strength_settings (o las de por defecto). */
+export function progressionFrom(row) {
+  if (!row) return DEFAULT_PROGRESSION;
+  const n = (v, d) => (v == null || v === '' ? d : Number(v));
+  const D = DEFAULT_PROGRESSION;
+  return {
+    reps: { min: n(row.reps_min, D.reps.min), max: n(row.reps_max, D.reps.max) },
+    segundos: { min: n(row.secs_min, D.segundos.min), max: n(row.secs_max, D.segundos.max) },
+    step: {
+      inferior: n(row.step_inferior, D.step.inferior), superior: n(row.step_superior, D.step.superior),
+      core: n(row.step_core, D.step.core), isometrico: n(row.step_isometrico, D.step.isometrico),
+    },
+  };
+}
+
 const valid = (sets) => (sets || []).map(Number).filter((n) => Number.isFinite(n) && n > 0);
 const r1 = (n) => Math.round(n * 10) / 10;
 
-export function stepFor(ex) {
-  if (ex.measure === 'segundos') return PROGRESSION.step.isometrico;
-  return PROGRESSION.step[ex.body] ?? PROGRESSION.step.superior;
+export function stepFor(ex, P = DEFAULT_PROGRESSION) {
+  if (ex.measure === 'segundos') return P.step.isometrico;
+  return P.step[ex.body] ?? P.step.superior;
 }
 
 /** 1RM estimado (Epley) o mejor tiempo en isométricos. */
@@ -37,27 +53,27 @@ export function volumeFor(ex, weight, sets) {
 }
 
 /** 'subir' | 'mantener' | 'bajar' */
-export function actionFor(ex, sets) {
+export function actionFor(ex, sets, P = DEFAULT_PROGRESSION) {
   const s = valid(sets);
   if (!s.length) return null;
-  const { min, max } = PROGRESSION[ex.measure] || PROGRESSION.reps;
+  const { min, max } = P[ex.measure] || P.reps;
   if (s.every((n) => n >= max)) return 'subir';
   if (s.some((n) => n < min)) return 'bajar';
   return 'mantener';
 }
 
-export function suggestedWeight(ex, weight, sets) {
-  const a = actionFor(ex, sets);
+export function suggestedWeight(ex, weight, sets, P = DEFAULT_PROGRESSION) {
+  const a = actionFor(ex, sets, P);
   const w = Number(weight || 0);
-  if (a === 'subir') return r1(w + stepFor(ex));
-  if (a === 'bajar') return r1(Math.max(0, w - stepFor(ex)));
+  if (a === 'subir') return r1(w + stepFor(ex, P));
+  if (a === 'bajar') return r1(Math.max(0, w - stepFor(ex, P)));
   return w;
 }
 
 export const ACTION_LABEL = { subir: 'Subir carga', mantener: 'Mantener peso', bajar: 'Bajar carga' };
 
 /** Resumen de un registro: marca, volumen, acción y peso sugerido. */
-export function analyze(ex, entry, previous) {
+export function analyze(ex, entry, previous, P = DEFAULT_PROGRESSION) {
   const mark = markFor(ex, entry.weight_kg, entry.sets);
   const prevMark = previous ? markFor(ex, previous.weight_kg, previous.sets) : null;
   return {
@@ -65,8 +81,8 @@ export function analyze(ex, entry, previous) {
     prevMark,
     change: mark != null && prevMark != null ? r1(mark - prevMark) : null,
     volume: volumeFor(ex, entry.weight_kg, entry.sets),
-    action: actionFor(ex, entry.sets),
-    suggested: suggestedWeight(ex, entry.weight_kg, entry.sets),
+    action: actionFor(ex, entry.sets, P),
+    suggested: suggestedWeight(ex, entry.weight_kg, entry.sets, P),
   };
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { searchFoods, recentFoods, getFood, addEntry, updateEntry, findByBarcode, currentUserId } from '../lib/api.js';
+import { searchFoods, recentFoods, getFood, addEntry, updateEntry, findByBarcode } from '../lib/api.js';
 import { canEditFood } from '../lib/foodEdit.js';
+import { useProfile } from '../lib/profile.js';
 import { fetchOFF, mapOFF } from '../lib/off.js';
 import { Scanner } from '../components/Scanner.jsx';
 import { macrosFor, portionsFor, describePortions, subtypeFor } from '../lib/portions.js';
@@ -11,7 +12,9 @@ const n0 = (x) => Math.round(Number(x) || 0);
 const n1 = (x) => Math.round((Number(x) || 0) * 10) / 10;
 
 export function AddFood({ date, meal, groups, onClose, onAdded, onFoodEdited }) {
+  const { isAdmin } = useProfile();
   const [step, setStep] = useState('search');
+  const [missing, setMissing] = useState(null); // { code, reason } cuando hay que pedírselo al administrador
   const [food, setFood] = useState(null);
   const [query, setQuery] = useState('');
   const [draft, setDraft] = useState(null); // { initial, source, notice } para NewFood
@@ -25,6 +28,16 @@ export function AddFood({ date, meal, groups, onClose, onAdded, onFoodEdited }) 
       if (local) { setFood(local); setStep('detail'); return; }
       let product = null;
       try { product = await fetchOFF(code); } catch { product = null; }
+      if (product && !isAdmin && !mapOFF(product).complete) {
+        setMissing({ code, name: mapOFF(product).name, reason: 'incompleto' });
+        setStep('missing');
+        return;
+      }
+      if (!product && !isAdmin) {
+        setMissing({ code, reason: 'no-encontrado' });
+        setStep('missing');
+        return;
+      }
       if (product) {
         const m = mapOFF(product);
         setDraft({
@@ -65,7 +78,7 @@ export function AddFood({ date, meal, groups, onClose, onAdded, onFoodEdited }) 
     <div class="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div class="sheet" role="dialog" aria-modal="true">
         {step === 'search' && (
-          <Search query={query} setQuery={setQuery} onPick={pick} onScan={() => setStep('scan')}
+          <Search query={query} setQuery={setQuery} onPick={pick} onScan={() => setStep('scan')} isAdmin={isAdmin}
             onNew={() => { setDraft({ initial: { name: query } }); setStep('new'); }} onClose={onClose} />
         )}
         {step === 'scan' && <Scanner onCode={onCode} onCancel={() => setStep('search')} />}
@@ -75,9 +88,28 @@ export function AddFood({ date, meal, groups, onClose, onAdded, onFoodEdited }) 
             <p>Buscando {lookup}…</p>
           </div>
         )}
+        {step === 'missing' && missing && (
+          <>
+            <header class="sheet-head">
+              <button class="link" onClick={() => setStep('search')}>‹ Buscar</button>
+              <b>Falta este producto</b>
+            </header>
+            <div class="sheet-body missing-food">
+              <p class="big-icon" aria-hidden="true">📷</p>
+              <p>
+                {missing.reason === 'incompleto'
+                  ? <>Encontré {missing.name ? <b>{missing.name}</b> : 'el producto'} en Open Food Facts, pero le faltan datos nutricionales.</>
+                  : <>El código <b>{missing.code}</b> no está en la base ni en Open Food Facts.</>}
+              </p>
+              <p class="muted">Mándale al administrador fotos de la etiqueta nutricional, del frente y del código de barras para que lo agregue al catálogo. Mientras tanto puedes registrar algo parecido.</p>
+              <p class="muted small">Código: {missing.code}</p>
+              <button class="btn primary wide" onClick={() => setStep('search')}>Buscar otro alimento</button>
+            </div>
+          </>
+        )}
         {step === 'detail' && food && (
           <Detail food={food} date={date} meal={meal} groups={groups} onBack={() => setStep('search')} onAdded={onAdded}
-            onEditFood={() => setStep('editfood')} />
+            onEditFood={isAdmin ? () => setStep('editfood') : undefined} />
         )}
         {step === 'editfood' && food && (
           <NewFood food={food} groups={groups} onBack={() => setStep('detail')}
@@ -96,7 +128,7 @@ export function AddFood({ date, meal, groups, onClose, onAdded, onFoodEdited }) 
   );
 }
 
-function Search({ query, setQuery, onPick, onNew, onScan, onClose }) {
+function Search({ query, setQuery, onPick, onNew, onScan, onClose, isAdmin }) {
   const [results, setResults] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -156,7 +188,11 @@ function Search({ query, setQuery, onPick, onNew, onScan, onClose }) {
           ))}
         </ul>
         {!busy && query.trim() && results.length === 0 && <p class="muted empty">No encontré “{query}”.</p>}
-        <button class="btn ghost wide" onClick={onNew}>+ Crear alimento nuevo</button>
+        {isAdmin ? (
+          <button class="btn ghost wide" onClick={onNew}>+ Crear alimento nuevo</button>
+        ) : (
+          <p class="muted hint center">¿No lo encuentras? Escanea su código de barras. Si no aparece con todos sus datos, pídele al administrador que lo agregue.</p>
+        )}
       </div>
     </>
   );
@@ -177,9 +213,8 @@ export function Detail({ food, date, meal: initialMeal, groups, onBack, onAdded,
   );
   const [meal, setMeal] = useState(initialMeal);
   const [busy, setBusy] = useState(false);
-  const [userId, setUserId] = useState(null);
-  useEffect(() => { currentUserId().then(setUserId).catch(() => {}); }, []);
-  const editable = onEditFood && canEditFood(food, userId);
+  const { isAdmin } = useProfile();
+  const editable = onEditFood && canEditFood(food, isAdmin);
 
   function changeMeasure(id) {
     setMeasureId(id);

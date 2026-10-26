@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'preact/hooks';
 import { saveStrength, deleteStrength, exerciseHistory, createExercise } from '../lib/api.js';
-import { analyze, markFor, fmtKg, stepFor, ACTION_LABEL, PROGRESSION } from '../lib/strength.js';
+import { analyze, markFor, fmtKg, stepFor, ACTION_LABEL, DEFAULT_PROGRESSION } from '../lib/strength.js';
+import { similarExercises } from '../lib/exerciseMatch.js';
 import { DAY_NAMES } from '../lib/routine.js';
 import { fromISO } from '../lib/dates.js';
 
 const unit = (ex) => (ex.measure === 'segundos' ? 's' : 'reps');
 
 /* ------------------------- Registrar un ejercicio ------------------------- */
-export function LogSet({ exercise: ex, date, current, previous, onClose, onSaved }) {
-  const prevA = previous ? analyze(ex, previous, null) : null;
+export function LogSet({ exercise: ex, progression: P = DEFAULT_PROGRESSION, date, current, previous, onClose, onSaved }) {
+  const prevA = previous ? analyze(ex, previous, null, P) : null;
   const startSets = current?.sets || previous?.sets || [null, null, null];
   const [tab, setTab] = useState('registro');
   const [weight, setWeight] = useState(String(current?.weight_kg ?? prevA?.suggested ?? 0));
@@ -18,9 +19,9 @@ export function LogSet({ exercise: ex, date, current, previous, onClose, onSaved
   const [busy, setBusy] = useState(false);
 
   const nums = sets.map((s) => Number(s)).filter((n) => n > 0);
-  const live = nums.length ? analyze(ex, { weight_kg: Number(weight) || 0, sets: nums }, previous) : null;
-  const range = PROGRESSION[ex.measure] || PROGRESSION.reps;
-  const step = stepFor(ex);
+  const live = nums.length ? analyze(ex, { weight_kg: Number(weight) || 0, sets: nums }, previous, P) : null;
+  const range = P[ex.measure] || P.reps;
+  const step = stepFor(ex, P);
 
   const setAt = (i, v) => setSets(sets.map((s, j) => (j === i ? v : s)));
 
@@ -167,7 +168,7 @@ function Sparkline({ values }) {
 }
 
 /* ------------------------ Elegir o crear un ejercicio ------------------------ */
-export function ExercisePicker({ exercises, onClose, onPick }) {
+export function ExercisePicker({ exercises, rt, onClose, onPick }) {
   const [q, setQ] = useState('');
   const [creating, setCreating] = useState(false);
   const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -179,7 +180,8 @@ export function ExercisePicker({ exercises, onClose, onPick }) {
     <div class="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div class="sheet" role="dialog" aria-modal="true">
         {creating ? (
-          <NewExercise initialName={q} onBack={() => setCreating(false)} onCreated={(ex) => onPick(ex, true)} />
+          <NewExercise initialName={q} exercises={exercises} onBack={() => setCreating(false)} onCreated={(ex) => onPick(ex, true)}
+            onPickExisting={(ex) => onPick(ex, false)} />
         ) : (
           <>
             <header class="sheet-head">
@@ -194,7 +196,7 @@ export function ExercisePicker({ exercises, onClose, onPick }) {
                     <button class="result" key={e.id} onClick={() => onPick(e, false)}>
                       <span class="entry-main">
                         <span class="entry-name">{e.name}</span>
-                        <span class="muted">{(e.days || []).map((d) => DAY_NAMES[d].slice(0, 3)).join(' · ') || 'sin día fijo'}</span>
+                        <span class="muted">{(e.days || []).filter((d) => !rt || rt.isTraining(d)).map((d) => DAY_NAMES[d].slice(0, 3)).join(' · ') || 'no está en tu rutina'}</span>
                       </span>
                     </button>
                   ))}
@@ -209,18 +211,22 @@ export function ExercisePicker({ exercises, onClose, onPick }) {
   );
 }
 
-function NewExercise({ initialName, onBack, onCreated }) {
-  const [f, setF] = useState({ name: initialName, muscle: '', body: 'superior', measure: 'reps', days: [] });
+export function NewExercise({ initialName, initialDays = [], exercises = [], onBack, onCreated, onPickExisting, title = 'Nuevo ejercicio', submitLabel = 'Crear y registrar' }) {
+  const [f, setF] = useState({ name: initialName, muscle: '', body: 'superior', measure: 'reps', days: initialDays });
   const [busy, setBusy] = useState(false);
   const toggleDay = (d) => setF({ ...f, days: f.days.includes(d) ? f.days.filter((x) => x !== d) : [...f.days, d].sort() });
+  const [confirmed, setConfirmed] = useState(false);
+  const similar = f.name.trim().length >= 3 ? similarExercises(f.name, exercises) : [];
+  const exact = similar.find((s) => s.exact);
 
   async function save(e) {
     e.preventDefault();
+    if (exact || (similar.length && !confirmed)) return;
     setBusy(true);
     try {
       onCreated(await createExercise({ ...f, name: f.name.trim(), muscle: f.muscle.trim() || null }));
     } catch (err) {
-      alert(err.message.includes('duplicate') ? 'Ya tienes un ejercicio con ese nombre.' : err.message);
+      alert(err.message.includes('duplicate') ? 'Ya existe un ejercicio con ese nombre en el catálogo.' : err.message);
       setBusy(false);
     }
   }
@@ -229,17 +235,32 @@ function NewExercise({ initialName, onBack, onCreated }) {
     <>
       <header class="sheet-head">
         <button class="link" onClick={onBack}>‹ Ejercicios</button>
-        <b>Nuevo ejercicio</b>
+        <b>{title}</b>
       </header>
       <form class="sheet-body form" onSubmit={save}>
-        <label>Nombre<input required value={f.name} onInput={(e) => setF({ ...f, name: e.currentTarget.value })} /></label>
+        <label>Nombre<input required value={f.name} onInput={(e) => { setConfirmed(false); setF({ ...f, name: e.currentTarget.value }); }} /></label>
+        {similar.length > 0 && (
+          <div class={`notice ${exact ? 'warn' : ''}`}>
+            <span>
+              <b>{exact ? 'Ese ejercicio ya está en el catálogo.' : '¿Es alguno de estos?'}</b>
+              <span class="similar-list">
+                {similar.map((s) => (
+                  <button type="button" class="chip-btn" key={s.ex.id} onClick={() => onPickExisting?.(s.ex)}>{s.ex.name}{s.ex.muscle ? <small class="muted"> · {s.ex.muscle}</small> : null}</button>
+                ))}
+              </span>
+              {!exact && (
+                <label class="check"><input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.currentTarget.checked)} /> No, es un ejercicio distinto</label>
+              )}
+            </span>
+          </div>
+        )}
         <label>Grupo muscular<input value={f.muscle} placeholder="Pecho, Espalda, Pierna…" onInput={(e) => setF({ ...f, muscle: e.currentTarget.value })} /></label>
         <div class="grid2">
           <label>Tren
             <select value={f.body} onChange={(e) => setF({ ...f, body: e.currentTarget.value })}>
-              <option value="superior">Superior (+2,5 kg)</option>
-              <option value="inferior">Inferior (+5 kg)</option>
-              <option value="core">Core (+2,5 kg)</option>
+              <option value="superior">Superior</option>
+              <option value="inferior">Inferior</option>
+              <option value="core">Core</option>
             </select>
           </label>
           <label>Medida
@@ -250,14 +271,14 @@ function NewExercise({ initialName, onBack, onCreated }) {
           </label>
         </div>
         <div>
-          <span class="label-text">Días habituales</span>
+          <span class="label-text">En qué días de tu rutina va</span>
           <div class="chips">
             {[1, 2, 3, 4, 5, 6, 7].map((d) => (
               <button type="button" key={d} class={f.days.includes(d) ? 'on' : ''} onClick={() => toggleDay(d)}>{DAY_NAMES[d].slice(0, 3)}</button>
             ))}
           </div>
         </div>
-        <button class="btn primary wide" disabled={busy || !f.name.trim()}>{busy ? 'Guardando…' : 'Crear y registrar'}</button>
+        <button class="btn primary wide" disabled={busy || !f.name.trim() || !!exact || (similar.length > 0 && !confirmed)}>{busy ? 'Guardando…' : submitLabel}</button>
       </form>
     </>
   );

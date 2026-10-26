@@ -9,6 +9,7 @@ import { KcalMeter } from '../components/KcalMeter.jsx';
 import { dayEnergy, balanceLabel, bmrFor } from '../lib/energy.js';
 import { AddFood, Detail } from './AddFood.jsx';
 import { NewFood } from './NewFood.jsx';
+import { useProfile } from '../lib/profile.js';
 import { MEALS, EXTRA_SECTIONS } from '../lib/meals.js';
 
 const n0 = (x) => Math.round(Number(x) || 0);
@@ -23,6 +24,7 @@ export function Day({ groups, date, setDate }) {
   const [editing, setEditing] = useState(null); // { entry, food }
   const [waterMl, setWaterMl] = useState(0);
   const [dayActive, setDayActive] = useState(null);
+  const { isAdmin } = useProfile();
   const [scans, setScans] = useState([]);
   useEffect(() => { listInbody().then(setScans).catch(() => {}); }, []);
 
@@ -88,6 +90,9 @@ export function Day({ groups, date, setDate }) {
 
       <main class="content">
         {error && <p class="error">{error}</p>}
+        {!loading && !plan && !error && (
+          <p class="notice warn">Todavía no tienes un plan alimenticio para esta fecha. Pídele al administrador que cargue el plan de tu nutricionista.</p>
+        )}
 
         <KcalMeter
           eaten={sum('kcal')}
@@ -138,7 +143,7 @@ export function Day({ groups, date, setDate }) {
                 onSaved={async () => { await load(); setEditing(null); }} />
             ) : (
             <Detail
-              onEditFood={() => setEditing({ ...editing, mode: 'food' })}
+              onEditFood={isAdmin ? () => setEditing({ ...editing, mode: 'food' }) : undefined}
               food={editing.food}
               entry={editing.entry}
               date={date}

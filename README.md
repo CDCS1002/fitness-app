@@ -117,3 +117,15 @@ Desde la migración `0020_catalog.sql`, los alimentos nuevos ya no requieren cor
    (huella `catalog_hash`). Ante cualquier error lo reintenta en la siguiente apertura.
 
 Los cambios de estructura (tablas y columnas) siguen siendo migraciones SQL.
+
+## Varios usuarios (migración 0021)
+
+- **Código:** diseño y estructura (pantallas, rueda de emociones, tiempos de comida, tipos de actividad, motor de porciones).
+- **Base de datos:** catálogos comunes (alimentos, ejercicios, equivalencias de porciones con sus kcal por porción) y datos de cada usuario.
+- **Administrador** (`app_admins`, `is_admin()`): corrige alimentos y ejercicios y carga el catálogo automático.
+- **Alimentos:** un solo catálogo que todos ven. Los demás usuarios solo pueden agregar productos escaneados de
+  Open Food Facts con kcal, proteína, carbohidratos y grasa; si falta algo, se pide al administrador.
+- **Ejercicios:** catálogo común; cualquiera agrega (con aviso de nombres parecidos, `src/lib/exerciseMatch.js`).
+  Lo personal (en qué días va cada ejercicio, archivado) está en `exercise_prefs`.
+- **Rutina semanal** (`routines`) y **reglas de progresión** (`strength_settings`) por usuario; se editan en Fuerza → «⚙︎ Rutina».
+- Las columnas viejas `exercises.days` y `exercises.archived` se conservan como respaldo hasta confirmar.

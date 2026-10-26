@@ -4,8 +4,10 @@ import { analyze, fmtKg, ACTION_LABEL } from '../lib/strength.js';
 import { addDays, fromISO } from '../lib/dates.js';
 import { weekStart } from '../lib/weekly.js';
 import { DayHeader } from '../components/DayHeader.jsx';
-import { ROUTINES, DAY_NAMES, isoDow, routineName, exercisesForRoutine, routineForDay, missingThisWeek, isEveryDay } from '../lib/routine.js';
+import { DAY_NAMES, isoDow, exercisesForRoutine, routineForDay, missingThisWeek, isEveryDay } from '../lib/routine.js';
 import { LogSet, ExercisePicker } from '../components/StrengthSheets.jsx';
+import { RoutineEditor } from '../components/RoutineEditor.jsx';
+import { useProfile } from '../lib/profile.js';
 
 const fmtSets = (ex, sets) => sets.map(Number).join(' / ') + (ex.measure === 'segundos' ? ' s' : '');
 const int = (n) => new Intl.NumberFormat('es', { useGrouping: 'always' }).format(Math.round(n || 0));
@@ -30,6 +32,10 @@ export function Strength({ date, setDate }) {
   const [extra, setExtra] = useState([]); // ejercicios agregados a mano este día
   const [choice, setChoice] = useState(() => readChoice(date));
   const [picker, setPicker] = useState(false);
+  const [editor, setEditor] = useState(false);
+  const profile = useProfile();
+  const rt = profile.routines;
+  const P = profile.progression;
 
   async function load() {
     setLoading(true);
@@ -55,24 +61,24 @@ export function Strength({ date, setDate }) {
   const lastBefore = (exId) => entries.find((e) => e.exercise_id === exId && e.day < date) || null;
   const todayOf = (exId) => todays.find((e) => e.exercise_id === exId) || null;
 
-  const routine = routineForDay({ exercises, entries, day: date, dow, choice });
-  const isHabitual = routine === (dow <= 5 ? dow : 0);
+  const routine = routineForDay({ exercises, entries, day: date, dow, choice, rt });
+  const isHabitual = routine === rt.habitual(dow);
 
   // Rutinas que tocaban antes en la semana y no se hicieron
   const weekDays = [];
   for (let d = weekStart(date); d <= date; d = addDays(d, 1)) weekDays.push(d);
   const choices = Object.fromEntries(weekDays.map((d) => [d, readChoice(d)]).filter(([, v]) => v));
-  const missing = exercises.length ? missingThisWeek({ exercises, entries, weekDays, todayDow: dow, choices }).filter((k) => k !== routine) : [];
+  const missing = exercises.length && profile.ready ? missingThisWeek({ exercises, entries, weekDays, todayDow: dow, choices, rt }).filter((k) => k !== routine) : [];
 
   // Orden: lo ya registrado hoy, la rutina elegida (abdomen al final), lo agregado a mano
   const list = [];
   const seen = new Set();
   const push = (ex) => { if (ex && !seen.has(ex.id)) { seen.add(ex.id); list.push(ex); } };
   [...todays].reverse().forEach((e) => push(byId[e.exercise_id]));
-  const planned = exercisesForRoutine(exercises, routine);
-  planned.filter((e) => !isEveryDay(e)).forEach(push);
+  const planned = exercisesForRoutine(exercises, routine, rt);
+  planned.filter((e) => !isEveryDay(e, rt)).forEach(push);
   extra.forEach((id) => push(byId[id]));
-  planned.filter(isEveryDay).forEach(push);
+  planned.filter((e) => isEveryDay(e, rt)).forEach(push);
   const plannedLeft = planned.filter((e) => !todayOf(e.id)).length;
 
   const volume = todays.reduce((a, e) => {
@@ -94,17 +100,21 @@ export function Strength({ date, setDate }) {
 
       <main class="content">
         {error && <p class="error">{error}</p>}
+        {profile.error && <p class="error">{profile.error}</p>}
         <section class="card routine">
           <div class="routine-head">
-            <span class="muted">{isHabitual ? 'Hoy toca' : `Rutina del día · en vez de ${routineName(dow <= 5 ? dow : 0).replace(' + abdomen', '').toLowerCase()}`}</span>
-            <button class="link" onClick={() => setPicker(!picker)}>{picker ? 'Cerrar' : 'Cambiar'}</button>
+            <span class="muted">{isHabitual ? 'Hoy toca' : `Rutina del día · en vez de ${rt.short(rt.habitual(dow)).toLowerCase()}`}</span>
+            <span class="routine-links">
+              <button class="link" onClick={() => setPicker(!picker)}>{picker ? 'Cerrar' : 'Cambiar'}</button>
+              <button class="link" onClick={() => setEditor(true)} aria-label="Editar mi rutina">⚙︎ Rutina</button>
+            </span>
           </div>
-          <h2>{routineName(routine)}</h2>
+          <h2>{rt.name(routine)}</h2>
           {picker && (
             <div class="chips routine-chips" role="radiogroup" aria-label="Rutina del día">
-              {ROUTINES.map((r) => (
+              {rt.list.map((r) => (
                 <button key={r.key} role="radio" aria-checked={routine === r.key} class={routine === r.key ? 'on' : ''} onClick={() => choose(r.key)}>
-                  {r.name}{r.key >= 1 && r.key <= 5 && <small class="muted"> · {DAY_NAMES[r.key].slice(0, 3).toLowerCase()}</small>}
+                  {r.name}{r.key >= 1 && <small class="muted"> · {DAY_NAMES[r.key].slice(0, 3).toLowerCase()}</small>}
                 </button>
               ))}
             </div>
@@ -120,10 +130,10 @@ export function Strength({ date, setDate }) {
           <section class="card missing">
             <div>
               <b>Esta semana te falta</b>
-              <span class="muted">{missing.map((k) => `${routineName(k).replace(' + abdomen', '')} (${DAY_NAMES[k].toLowerCase()})`).join(' · ')}</span>
+              <span class="muted">{missing.map((k) => `${rt.short(k)} (${DAY_NAMES[k].toLowerCase()})`).join(' · ')}</span>
             </div>
             <button class="btn primary" onClick={() => choose(missing[0])}>
-              Hacer {ROUTINES.find((r) => r.key === missing[0]).name.split(' · ')[0].toLowerCase()} hoy
+              Hacer {rt.short(missing[0]).split(' · ')[0].toLowerCase()} hoy
             </button>
           </section>
         )}
@@ -133,7 +143,7 @@ export function Strength({ date, setDate }) {
           {list.map((ex) => {
             const cur = todayOf(ex.id);
             const prev = lastBefore(ex.id);
-            const a = cur ? analyze(ex, cur, prev) : prev ? analyze(ex, prev, null) : null;
+            const a = cur ? analyze(ex, cur, prev, P) : prev ? analyze(ex, prev, null, P) : null;
             return (
               <button class={`entry ex-row ${cur ? 'done' : ''}`} key={ex.id} onClick={() => setOpen(ex)}>
                 <span class={`ex-check ${cur ? 'on' : ''}`} aria-hidden="true">{cur ? '✓' : ''}</span>
@@ -171,6 +181,7 @@ export function Strength({ date, setDate }) {
       {open && (
         <LogSet
           exercise={open}
+          progression={P}
           date={date}
           current={todayOf(open.id)}
           previous={lastBefore(open.id)}
@@ -181,6 +192,7 @@ export function Strength({ date, setDate }) {
       {picking && (
         <ExercisePicker
           exercises={exercises}
+          rt={rt}
           onClose={() => setPicking(false)}
           onPick={(ex, isNew) => {
             if (isNew) setExercises((l) => [...l, ex].sort((a, b) => a.name.localeCompare(b.name)));
@@ -188,6 +200,13 @@ export function Strength({ date, setDate }) {
             setPicking(false);
             setOpen(ex);
           }}
+        />
+      )}
+      {editor && (
+        <RoutineEditor
+          exercises={exercises}
+          onClose={() => setEditor(false)}
+          onExercisesChanged={load}
         />
       )}
     </div>

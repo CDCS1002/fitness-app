@@ -2,15 +2,6 @@ import { supabase } from './supabase.js';
 import { groupsFromRows, macrosFor, portionsFor } from './portions.js';
 
 // Plan vigente (consulta del 13/10/2026). Solo se usa si la cuenta aún no tiene planes.
-export const DEFAULT_PLAN = {
-  name: 'Plan 2',
-  start_date: '2026-10-13',
-  targets: { proteina: 16, carbohidrato: 9, grasa: 3, lacteo: 2, vegetal: 3, fruta: 2, azucar: 3 },
-  kcal_target: 2040,
-  protein_target: 158,
-  carbs_target: 207,
-  fat_target: 65,
-};
 
 const FOOD_COLS =
   'id,name,brand,barcode,state,category,primary_group,protein_source,kcal,protein,carbs,fat,fiber,portions_override,source,verified,created_by';
@@ -25,16 +16,12 @@ export async function getGroups() {
   return groupsFromRows(rows);
 }
 
-/** Plan que aplica en una fecha; si no hay ninguno, crea el plan actual. */
+/** Plan que aplica en una fecha (null si el usuario aún no tiene plan para esa fecha). */
 export async function getPlanFor(date) {
   const rows = check(
     await supabase.from('plans').select('*').lte('start_date', date).order('start_date', { ascending: false }).limit(5),
   );
-  const plan = rows.find((p) => !p.end_date || p.end_date >= date);
-  if (plan) return plan;
-  const any = check(await supabase.from('plans').select('id').limit(1));
-  if (any.length) return null;
-  return check(await supabase.from('plans').insert(DEFAULT_PLAN).select().single());
+  return rows.find((p) => !p.end_date || p.end_date >= date) || null;
 }
 
 export async function entriesFor(date) {
@@ -200,8 +187,58 @@ export async function updatePlan(id, patch) {
 // ---------------------------------------------------------------------
 // Fuerza
 // ---------------------------------------------------------------------
+/**
+ * Catálogo común de ejercicios con las preferencias del usuario (días de rutina, archivado).
+ * Si la migración 0021 aún no se corrió, usa los días guardados en el propio ejercicio.
+ */
 export async function listExercises() {
-  return check(await supabase.from('exercises').select('*').order('name'));
+  const { data, error } = await supabase.from('exercises').select('*, prefs:exercise_prefs(days,archived)').order('name');
+  if (error) {
+    if (!/exercise_prefs|relationship/i.test(error.message)) throw new Error(error.message);
+    return check(await supabase.from('exercises').select('*').order('name'));
+  }
+  return data.map(({ prefs, ...e }) => ({ ...e, days: prefs?.[0]?.days ?? [], archived: prefs?.[0]?.archived ?? false }));
+}
+
+/** Días de rutina y archivado de un ejercicio para el usuario actual. */
+export async function saveExercisePrefs(exerciseId, { days, archived = false }) {
+  const user_id = await uid();
+  check(await supabase.from('exercise_prefs')
+    .upsert({ user_id, exercise_id: exerciseId, days, archived }, { onConflict: 'user_id,exercise_id' }));
+}
+
+/** Datos generales de un ejercicio del catálogo (solo el administrador). */
+export async function updateExercise(id, fields) {
+  return check(await supabase.from('exercises').update(fields).eq('id', id).select().single());
+}
+
+// ---------------------------------------------------------------------
+// Perfil: administrador, rutina semanal y reglas de progresión
+// ---------------------------------------------------------------------
+export async function isAdmin() {
+  const { data, error } = await supabase.rpc('is_admin');
+  if (error) return false;
+  return !!data;
+}
+
+export async function listRoutines() {
+  return check(await supabase.from('routines').select('*').order('weekday'));
+}
+
+export async function saveRoutines(rows) {
+  const user_id = await uid();
+  return check(await supabase.from('routines')
+    .upsert(rows.map((r) => ({ user_id, weekday: r.weekday, name: r.name, full_name: r.full_name || r.name, is_rest: !!r.is_rest })),
+      { onConflict: 'user_id,weekday' }).select().order('weekday'));
+}
+
+export async function getStrengthSettings() {
+  return check(await supabase.from('strength_settings').select('*').maybeSingle());
+}
+
+export async function saveStrengthSettings(fields) {
+  const user_id = await uid();
+  return check(await supabase.from('strength_settings').upsert({ user_id, ...fields }, { onConflict: 'user_id' }).select().single());
 }
 
 /** Registros hasta una fecha (incluida), del más reciente al más antiguo. */
@@ -231,8 +268,12 @@ export async function deleteStrength(id) {
   check(await supabase.from('strength_entries').delete().eq('id', id));
 }
 
-export async function createExercise(row) {
-  return check(await supabase.from('exercises').insert(row).select().single());
+/** Agrega un ejercicio al catálogo común y, si trae días, los guarda como preferencia propia. */
+export async function createExercise({ days = [], ...row }) {
+  const created_by = await uid();
+  const ex = check(await supabase.from('exercises').insert({ ...row, created_by }).select().single());
+  if (days.length) await saveExercisePrefs(ex.id, { days });
+  return { ...ex, days, archived: false };
 }
 
 // ---------------------------------------------------------------------

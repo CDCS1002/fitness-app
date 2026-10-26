@@ -554,3 +554,21 @@ textarea { background: var(--surface); border: 1px solid var(--line); border-rad
 .water.meal-card .bar span { background: var(--c) !important; }
 .water.meal-card .pair { margin-top: 10px; }
 .water.meal-card .wide-btn { background: color-mix(in srgb, var(--c) 16%, var(--surface-2)); }
+
+/* ---------- Producto faltante, rutina ---------- */
+.missing-food { text-align: center; display: grid; gap: 10px; }
+.missing-food .big-icon { font-size: 40px; margin: 8px 0 0; }
+.routine-links { display: inline-flex; gap: 14px; }
+.week-row { border-top: 1px solid var(--line); padding: 10px 0; display: grid; gap: 8px; }
+.week-row:first-of-type { border-top: 0; }
+.week-row.rest b { color: var(--muted); }
+.week-row-head { display: flex; justify-content: space-between; align-items: center; }
+.ex-pick { list-style: none; padding: 0; margin: 8px 0 12px; }
+.ex-pick li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
+.ex-toggle { flex: 1; display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 10px 0; text-align: left; color: var(--text); font: inherit; }
+.ex-toggle .ex-check { width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--line); display: grid; place-items: center; flex: none; color: #111; font-weight: 700; }
+.ex-toggle.on .ex-check { background: var(--accent); border-color: var(--accent); }
+.similar-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.chip-btn { background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 5px 10px; color: var(--text); font: inherit; font-size: 13px; }
+
+.sheet-tabs.seg.three { grid-template-columns: repeat(3, 1fr); }

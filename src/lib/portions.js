@@ -31,12 +31,12 @@ export const GROUP_ORDER = ['proteina', 'carbohidrato', 'grasa', 'lacteo', 'vege
 export const ALL_GROUPS = [...GROUP_ORDER, 'azucar'];
 
 export const DEFAULT_GROUPS = {
-  proteina:     { name: 'Proteína',     basis_macro: 'protein', basis_grams: 7,  protein_ref: 7, carbs_ref: 0,  fat_ref: 0, fat_cap: 8, color: '#e4572e' },
-  carbohidrato: { name: 'Carbohidrato', basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, fat_cap: 1, color: '#f3a712' },
-  grasa:        { name: 'Grasa',        basis_macro: 'fat',     basis_grams: 5,  protein_ref: 0, carbs_ref: 0,  fat_ref: 5, fat_cap: 0, color: '#a8c686' },
-  lacteo:       { name: 'Lácteo',       basis_macro: 'carbs',   basis_grams: 12, protein_ref: 8, carbs_ref: 12, fat_ref: 0, fat_cap: 8, color: '#4f9de0' },
-  vegetal:      { name: 'Vegetal',      basis_macro: 'carbs',   basis_grams: 5,  protein_ref: 2, carbs_ref: 5,  fat_ref: 0, fat_cap: 0, color: '#3fae6a' },
-  fruta:        { name: 'Fruta',        basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, fat_cap: 0, color: '#d64f9a' },
+  proteina:     { name: 'Proteína',     basis_macro: 'protein', basis_grams: 7,  protein_ref: 7, carbs_ref: 0,  fat_ref: 0, fat_cap: 8, color: '#e4572e', portion_kcal: 45, portion_protein: 7, portion_carbs: 0, portion_fat: 2 },
+  carbohidrato: { name: 'Carbohidrato', basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, fat_cap: 1, color: '#f3a712', portion_kcal: 80, portion_protein: 3, portion_carbs: 15, portion_fat: 1 },
+  grasa:        { name: 'Grasa',        basis_macro: 'fat',     basis_grams: 5,  protein_ref: 0, carbs_ref: 0,  fat_ref: 5, fat_cap: 0, color: '#a8c686', portion_kcal: 45, portion_protein: 0, portion_carbs: 0, portion_fat: 5 },
+  lacteo:       { name: 'Lácteo',       basis_macro: 'carbs',   basis_grams: 12, protein_ref: 8, carbs_ref: 12, fat_ref: 0, fat_cap: 8, color: '#4f9de0', portion_kcal: 100, portion_protein: 8, portion_carbs: 12, portion_fat: 1.5 },
+  vegetal:      { name: 'Vegetal',      basis_macro: 'carbs',   basis_grams: 5,  protein_ref: 2, carbs_ref: 5,  fat_ref: 0, fat_cap: 0, color: '#3fae6a', portion_kcal: 25, portion_protein: 2, portion_carbs: 5, portion_fat: 0 },
+  fruta:        { name: 'Fruta',        basis_macro: 'carbs',   basis_grams: 15, protein_ref: 0, carbs_ref: 15, fat_ref: 0, fat_cap: 0, color: '#d64f9a', portion_kcal: 60, portion_protein: 0, portion_carbs: 15, portion_fat: 0 },
   azucar:       { name: 'Azúcar',       basis_macro: 'carbs',   basis_grams: 5,  protein_ref: 0, carbs_ref: 5,  fat_ref: 0, fat_cap: 0, color: '#b48ead' },
 };
 
@@ -57,6 +57,10 @@ export function groupsFromRows(rows) {
       fat_ref: Number(r.fat_ref),
       fat_cap: Number(r.fat_cap ?? DEFAULT_GROUPS[r.code]?.fat_cap ?? 0),
       color: r.color || DEFAULT_GROUPS[r.code]?.color,
+      portion_kcal: r.portion_kcal ?? DEFAULT_GROUPS[r.code]?.portion_kcal ?? null,
+      portion_protein: r.portion_protein ?? DEFAULT_GROUPS[r.code]?.portion_protein ?? null,
+      portion_carbs: r.portion_carbs ?? DEFAULT_GROUPS[r.code]?.portion_carbs ?? null,
+      portion_fat: r.portion_fat ?? DEFAULT_GROUPS[r.code]?.portion_fat ?? null,
     };
   }
   return map;
