@@ -48,11 +48,24 @@ const CATEGORY_GROUPS = [
   [/nuts|seeds|oils|butters|avocado|dressings|mayonnaises/, 'grasa'],
 ];
 
-/** Grupo principal: primero por categoría; si no, por el macro que más kcal aporta. */
-export function guessGroup(categories = [], m) {
+// Leches y yogures por el nombre, cuando Open Food Facts no trae categoría
+// (no aplica a quesos, dulce de leche ni proteína en polvo).
+const DAIRY_NAME = /\b(leche|yogh?urt?|yogur|kefir|milk)\b/i;
+const NOT_DAIRY_NAME = /queso|cheese|dulce de leche|cajeta|polvo|powder|whey|helado|ice cream/i;
+export const isDairyName = (name = '') => DAIRY_NAME.test(name) && !NOT_DAIRY_NAME.test(name);
+
+/**
+ * Lácteo con proteína añadida: trae más proteína de la que acompaña a su lactosa
+ * (8 g por cada 12 g de carbohidratos en la lista); el extra cuenta como proteína.
+ */
+export const isProteinDairy = (m) => (m.protein || 0) >= 5 && (m.protein || 0) > ((m.carbs || 0) * 8 / 12) * 1.2;
+
+/** Grupo principal: primero por categoría, luego por el nombre; si no, por el macro que más kcal aporta. */
+export function guessGroup(categories = [], m, name = '') {
   for (const tag of [...categories].reverse()) {
     for (const [re, g] of CATEGORY_GROUPS) if (re.test(tag)) return g;
   }
+  if (isDairyName(name)) return 'lacteo';
   const kp = (m.protein || 0) * 4, kc = (m.carbs || 0) * 4, kf = (m.fat || 0) * 9;
   if (kp >= kc && kp >= kf) return 'proteina';
   if (kf > kc) return 'grasa';
@@ -75,7 +88,8 @@ export function mapOFF(p) {
     fat: r2(per100(n, 'fat', servingQty)),
     fiber: r2(per100(n, 'fiber', servingQty)),
   };
-  const primary = guessGroup(p.categories_tags || [], m);
+  const productName = (p.product_name_es || p.product_name || p.generic_name_es || '').trim();
+  const primary = guessGroup(p.categories_tags || [], m, productName);
   // "1 galleta (24 g)" → "galleta"; "30 g" → "porción"
   const servingLabel = (p.serving_size || '')
     .replace(/\s*\(.*\)\s*$/, '')
@@ -83,11 +97,11 @@ export function mapOFF(p) {
     .trim();
   const isUnit = /^(g|gr|grs|gramos?|ml|mL|oz|cl|l)$/i.test(servingLabel);
   return {
-    name: (p.product_name_es || p.product_name || p.generic_name_es || '').trim(),
+    name: productName,
     brand: (p.brands || '').split(',')[0].trim(),
     barcode: p.code,
     primary_group: primary,
-    protein_source: primary !== 'proteina' && primary !== 'lacteo' && (m.protein || 0) >= 10,
+    protein_source: primary === 'lacteo' ? isProteinDairy(m) : primary !== 'proteina' && (m.protein || 0) >= 10,
     basis: '100',
     kcal: m.kcal ?? '',
     protein: m.protein ?? '',

@@ -55,3 +55,25 @@ test('Datos incompletos se marcan para revisar', () => {
   assert.equal(r.protein, '');
   assert.equal(r.serving_grams, '');
 });
+
+test('leche con proteína sin categoría: lácteo por el nombre y el extra cuenta como proteína', async () => {
+  const { portionsFor, roundedPortions } = await import('../src/lib/portions.js');
+  const p = { code: '7441000000000', product_name: 'Leche 50% + Proteína Choco Almendras', brands: 'Dos Pinos', categories_tags: [],
+    nutriments: { 'energy-kcal_100g': 64, proteins_100g: 6, carbohydrates_100g: 6, fat_100g: 1.6 }, serving_size: '250 ml', serving_quantity: 250 };
+  const r = mapOFF(p);
+  assert.equal(r.primary_group, 'lacteo');
+  assert.equal(r.protein_source, true);
+  const food = { primary_group: r.primary_group, protein_source: r.protein_source, kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat };
+  const por = roundedPortions(portionsFor(food, 250));
+  // 15 g de carbohidratos → 1¼ lácteo (redondea a 1½); 15 − 10 g de proteína → ½ proteína
+  assert.equal(por.lacteo, 1.5);
+  assert.equal(por.proteina, 0.5);
+  assert.equal(por.carbohidrato, undefined);
+});
+
+test('nombres que no son lácteo de la lista', () => {
+  assert.equal(guessGroup([], { protein: 80, carbs: 6, fat: 5 }, 'Whey protein leche'), 'proteina');
+  assert.equal(guessGroup([], { protein: 25, carbs: 2, fat: 30 }, 'Queso de leche de vaca'), 'grasa');
+  assert.equal(guessGroup([], { protein: 7, carbs: 55, fat: 8 }, 'Dulce de leche'), 'carbohidrato');
+  assert.equal(guessGroup([], { protein: 3.3, carbs: 4.8, fat: 1 }, 'Leche semidescremada'), 'lacteo');
+});
