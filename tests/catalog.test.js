@@ -49,3 +49,11 @@ test('corrección del catálogo: se aplica si no lo editaste, se respeta si lo e
   const same = planSync([old], [untouched]);
   assert.deepEqual([same.inserts.length, same.updates.length, same.adopts.length, same.kept.length], [0, 0, 0, 0]);
 });
+
+test('un alimento enlazado sin huella se retoma cuando coincide con el catálogo', () => {
+  const it = item(base);
+  const p = planSync([it], [{ id: 'f1', catalog_key: it.key, catalog_hash: null, ...base }]);
+  assert.deepEqual(p.adopts.map((a) => [a.id, a.hash]), [['f1', it.hash]]);
+  const q = planSync([it], [{ id: 'f1', catalog_key: it.key, catalog_hash: null, ...base, kcal: 1 }]);
+  assert.equal(q.kept.length, 1);
+});

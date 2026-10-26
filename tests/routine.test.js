@@ -15,8 +15,8 @@ const rt = makeRoutines([
 ]);
 const isEveryDay = (e) => everyDay(e, rt);
 
-const exercises = JSON.parse(readFileSync(new URL('../supabase/seed/exercises.json', import.meta.url))).map((e) => ({ ...e, id: e.name }));
-const history = JSON.parse(readFileSync(new URL('../supabase/seed/strength_history.json', import.meta.url)))
+const exercises = JSON.parse(readFileSync(new URL('./fixtures/exercises.json', import.meta.url))).map((e) => ({ ...e, id: e.name }));
+const history = JSON.parse(readFileSync(new URL('./fixtures/strength_history.json', import.meta.url)))
   .map((h) => ({ day: h.day, exercise_id: h.exercise }));
 const week = (from, n) => Array.from({ length: n }, (_, i) => `2026-10-${String(Number(from) + i).padStart(2, '0')}`);
 

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { buildDays } from '../src/lib/weekly.js';
 import { buildReport } from '../src/lib/report.js';
 
-const read = (f) => JSON.parse(readFileSync(new URL(`../supabase/seed/${f}`, import.meta.url)));
+const read = (f) => JSON.parse(readFileSync(new URL(`./fixtures/${f}`, import.meta.url)));
 const hist = read('progress_history.json');
 const exercises = read('exercises.json').map((e) => ({ ...e, id: e.name }));
 const strength = read('strength_history.json').map((s) => ({ day: s.day, exercise_id: s.exercise, weight_kg: s.weight, sets: s.sets }));

@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildDays, weeklySummary, weekStart, groupsOnTarget } from '../src/lib/weekly.js';
 
-const hist = JSON.parse(readFileSync(new URL('../supabase/seed/progress_history.json', import.meta.url)));
-const exercises = JSON.parse(readFileSync(new URL('../supabase/seed/exercises.json', import.meta.url))).map((e) => ({ ...e, id: e.name }));
-const strength = JSON.parse(readFileSync(new URL('../supabase/seed/strength_history.json', import.meta.url)))
+const hist = JSON.parse(readFileSync(new URL('./fixtures/progress_history.json', import.meta.url)));
+const exercises = JSON.parse(readFileSync(new URL('./fixtures/exercises.json', import.meta.url))).map((e) => ({ ...e, id: e.name }));
+const strength = JSON.parse(readFileSync(new URL('./fixtures/strength_history.json', import.meta.url)))
   .map((s) => ({ day: s.day, exercise_id: s.exercise, weight_kg: s.weight, sets: s.sets }));
 const plans = [{ name: 'Plan 1', start_date: '2026-09-28', end_date: null, water_train_ml: 3550, water_rest_ml: 2800, training_days: [1, 2, 3, 4, 5],
   targets: { proteina: 15, carbohidrato: 9, grasa: 3, lacteo: 2, vegetal: 3, fruta: 2 } }];

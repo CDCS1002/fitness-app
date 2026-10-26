@@ -68,6 +68,8 @@ export function planSync(items, existing) {
     if (row) {
       used.add(row.id);
       if (row.catalog_hash === item.hash) continue;
+      // Enlazado sin huella (difería al enlazarse) pero ahora coincide con el catálogo: se retoma
+      if (!row.catalog_hash && hashFood(row) === item.hash) { plan.adopts.push({ id: row.id, item, hash: item.hash }); continue; }
       // Solo se corrige si sigue igual a como se cargó (no lo editaste tú)
       if (row.catalog_hash && hashFood(row) === row.catalog_hash) plan.updates.push({ id: row.id, item });
       else plan.kept.push({ id: row.id, item });

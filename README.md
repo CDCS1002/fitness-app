@@ -4,47 +4,37 @@ PWA para registrar comidas por **porciones de intercambio** (proteína, carbohid
 
 - **Frontend:** Vite + Preact, publicado en GitHub Pages (`/fitness-app/`), instalable en el celular.
 - **Backend:** Supabase (Postgres + Auth + RLS). La llave publishable va en el frontend; la seguridad la imponen las políticas por fila.
-- **Panel:** el Google Sheet existente sigue siendo el dashboard; la sincronización llega en una fase siguiente.
+- **Datos:** todo vive en Supabase. El Google Sheet original ya no se usa.
 
 ## Estructura
 
 ```
-supabase/migrations/0001_schema.sql   tablas, RLS, búsqueda (pg_trgm + unaccent)
-supabase/migrations/0002_daily_activity.sql  agua, pasos y actividad
-supabase/migrations/0003_kcal_targets.sql    metas de kcal y macros
-supabase/migrations/0004_strength.sql        ejercicios y registros de fuerza
-supabase/seed/0004_strength_import.sql       catálogo e historial del Sheet (`node scripts/build-strength-seed.mjs`)
-src/lib/strength.js                   doble progresión, 1RM estimado y volumen
-supabase/migrations/0005_progress.sql        peso, InBody, días históricos y Post-entreno
-supabase/migrations/0006_sleep_energy.sql    sueño, energía y meta de sueño
-supabase/seed/0007_generic_foods.sql         112 alimentos genéricos (USDA) y corrección de genéricos estimados
-supabase/migrations/0008_visit.sql           próxima cita y notas para la nutricionista
-supabase/migrations/0009_combined_engine.sql motor combinado, grupo azúcar y equivalencia de tu leche
-supabase/seed/0010_list_foods.sql            alimentos de la lista de la nutricionista (56 genéricos, 39 de marca)
-supabase/migrations/0011_plan_2.sql          Planes 1 (24/08) y 2 (13/10) y grasa/músculo de la báscula de casa
-supabase/migrations/0012_sleep_stages_meds.sql fases del sueño, medicamentos y suplementos
-src/lib/sleep.js · src/lib/meds.js    fases del sueño; medicamentos, tomas y escáner (NIH DSLD → Open Food Facts)
-supabase/seed/0019_meats_legumes.sql  cortes de carne cocidos y cubaces (scripts/build-meats-seed.mjs)
-supabase/seed/0016_brands_cr.sql      productos de marca (Gricket House, Herbalife, Lizano, Rooster) con su fuente
-supabase/seed/0015_juices_soups.sql   jugos naturales y cremas de vegetales caseras (scripts/build-juices-soups-seed.mjs)
-supabase/migrations/0014_total_kcal.sql kcal activas del día del reloj (+ historial del Sheet)
-src/lib/energy.js                     gasto = basal InBody + activas del día; fuera del entreno; balance
-supabase/migrations/0013_moods.sql    registros emocionales (momentos con hora y resumen del día)
-src/lib/emotions.js · moodReport.js   rueda de emociones (6 base › 36 › 72) con definiciones; reporte y patrones
-src/screens/Emotions.jsx · PsychReport.jsx  pestaña Emociones; reporte de psicología (en Progreso)
-src/lib/report.js                     reporte para la cita (misma estructura que la hoja Reporte cita)
-supabase/seed/0005_progress_import.sql       peso, InBody y Diario 13–21 oct del Sheet
-src/lib/weekly.js                     resumen semanal (misma lógica que la hoja Semanal)
-src/lib/inbody.js                     indicadores InBody, rangos y si conviene que suban o bajen
-src/lib/targets.js                    metas del día (explícitas o estimadas por porciones)
-supabase/seed/foods.json              alimentos iniciales (editar aquí)
-supabase/seed/0002_foods.sql          generado con `npm run seed`
-src/lib/portions.js                   motor de porciones
+supabase/migrations/0001_base.sql     estructura completa: tablas, RLS, búsqueda, grupos de porciones
+supabase/migrations/0002_…sql         cambios posteriores (cada uno se corre una vez en el SQL Editor)
+supabase/catalog/foods.json           catálogo común de alimentos (por 100 g, con medidas y su fuente)
+scripts/build-catalog.mjs             valida el catálogo y genera public/catalog*.json (corre en cada build)
+src/lib/catalog.js                    carga automática del catálogo en la app (solo administrador)
+src/lib/portions.js · targets.js      motor de porciones; metas del día
 src/lib/off.js                        Open Food Facts: búsqueda por código y conversión
-src/components/Scanner.jsx            cámara + lector de códigos (zxing-wasm, servido localmente)
-src/screens/                          Login, Día, Agregar, Nuevo alimento
-tests/                                pruebas del motor (`npm test`)
+src/lib/routine.js · strength.js      rutina semanal (datos en la base) y doble progresión
+src/lib/exerciseMatch.js              aviso de ejercicios con nombre parecido
+src/lib/profile.js                    perfil con sesión: administrador, rutina y reglas de progresión
+src/lib/energy.js                     gasto = basal InBody + anillo rojo; balance
+src/lib/sleep.js · meds.js            fases del sueño; medicamentos y escáner (NIH DSLD → Open Food Facts)
+src/lib/emotions.js · moodReport.js   rueda de emociones y reporte de psicología
+src/lib/weekly.js · report.js         resumen semanal y reporte para la cita
+src/lib/inbody.js                     indicadores InBody
+src/components/ · src/screens/        interfaz
+tests/                                pruebas (`npm test`); tests/fixtures con datos de ejemplo
 ```
+
+### Base de datos
+
+- **Base nueva:** correr `supabase/migrations/0001_base.sql` completo y marcar al primer usuario como
+  administrador (instrucción al final del archivo). Los alimentos llegan solos al abrir la app.
+- **Cambios futuros:** una migración nueva numerada desde la última (`0003_…`), idempotente.
+- `0001_base.sql` consolida las migraciones anteriores (historial en git); se verificó que deja exactamente la
+  misma estructura (tablas, columnas, restricciones, índices, políticas, funciones, triggers y permisos).
 
 ## Motor de porciones (combinado)
 
@@ -80,17 +70,19 @@ npm run dev
 
 1. Busca el código en tu base (`foods.barcode`, probando variantes UPC-A/EAN-13).
 2. Si no existe, consulta Open Food Facts y prellena el formulario (valores por 100 g, porción del empaque y grupo sugerido por categoría o macros).
-3. Si tampoco está ahí, abre el formulario con el código ya puesto para copiar la etiqueta.
+3. Si tampoco está ahí, el administrador lo agrega con la etiqueta; los demás usuarios ven el aviso para pedírselo.
 
-Lo que guardas queda en tu base, así que el siguiente escaneo del mismo producto es instantáneo.
+Lo que se guarda queda en el catálogo común, así que el siguiente escaneo del mismo producto es instantáneo.
 
 ## Fuerza
 
-Misma lógica que la hoja Fuerza del Sheet: rango 6–10 reps (30–90 s en isométricos); si todas las series llegan al máximo se sube la carga (+5 kg tren inferior, +2,5 kg superior, core e isométricos), si alguna queda por debajo del mínimo se baja, y si no se mantiene. La marca es el 1RM estimado (Epley) con la mejor serie. `tests/strength.test.js` reproduce casos reales del Sheet.
+Doble progresión con las reglas de cada usuario (`strength_settings`; por defecto 6–10 reps, 30–90 s en isométricos,
++5 kg tren inferior y +2,5 kg el resto): si todas las series llegan al máximo se sube la carga, si alguna queda por
+debajo del mínimo se baja, y si no se mantiene. La marca es el 1RM estimado (Epley) con la mejor serie.
 
 ### Rutina flexible
 
-Cada rutina se identifica con su día habitual (campo `days` de cada ejercicio). En la pestaña Fuerza se puede
+Cada rutina se identifica con su día habitual (`routines`, y los días de cada ejercicio en `exercise_prefs`). En la pestaña Fuerza se puede
 elegir la rutina del día; la lista trae todos sus ejercicios por grupo muscular y el abdomen al final. La app
 deduce qué rutinas se hicieron cada día a partir de lo registrado (una sesión mixta cuenta para varias si tiene
 al menos 2 ejercicios exclusivos de cada una) y avisa qué rutina de la semana falta. La elección se guarda en el
@@ -106,11 +98,10 @@ dispositivo; si se pierde, la rutina se deduce de los registros (`src/lib/routin
 
 ## Catálogo de alimentos (carga automática)
 
-Desde la migración `0020_catalog.sql`, los alimentos nuevos ya no requieren correr SQL:
+Los alimentos no requieren SQL:
 
-1. Se agregan al JSON que corresponda en `supabase/seed/` (`label_foods.json` para etiquetas,
-   `brands_cr.json`, `meats_legumes.json`, `juices_soups.json`).
-2. `npm run build` genera `public/catalog.json` y `public/catalog-version.json` (scripts/build-catalog.mjs).
+1. Se agregan a `supabase/catalog/foods.json` (valores por 100 g, medidas y `ref` con la fuente).
+2. `npm run build` valida el catálogo y genera `public/catalog.json` y `public/catalog-version.json`.
 3. Al abrir la app, 3 s después y en segundo plano, `syncCatalog` (src/lib/catalog.js) compara la versión con la
    última sincronizada en el dispositivo. Si cambió: inserta los nuevos, enlaza los que ya existían por scripts
    anteriores (por código de barras o nombre/marca/estado) y aplica correcciones solo a los que no editaste
@@ -118,7 +109,7 @@ Desde la migración `0020_catalog.sql`, los alimentos nuevos ya no requieren cor
 
 Los cambios de estructura (tablas y columnas) siguen siendo migraciones SQL.
 
-## Varios usuarios (migración 0021)
+## Varios usuarios
 
 - **Código:** diseño y estructura (pantallas, rueda de emociones, tiempos de comida, tipos de actividad, motor de porciones).
 - **Base de datos:** catálogos comunes (alimentos, ejercicios, equivalencias de porciones con sus kcal por porción) y datos de cada usuario.
@@ -128,4 +119,3 @@ Los cambios de estructura (tablas y columnas) siguen siendo migraciones SQL.
 - **Ejercicios:** catálogo común; cualquiera agrega (con aviso de nombres parecidos, `src/lib/exerciseMatch.js`).
   Lo personal (en qué días va cada ejercicio, archivado) está en `exercise_prefs`.
 - **Rutina semanal** (`routines`) y **reglas de progresión** (`strength_settings`) por usuario; se editan en Fuerza → «⚙︎ Rutina».
-- Las columnas viejas `exercises.days` y `exercises.archived` se conservan como respaldo hasta confirmar.

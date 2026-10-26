@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { similarExercises, nameSimilarity } from '../src/lib/exerciseMatch.js';
 
-const catalog = JSON.parse(readFileSync(new URL('../supabase/seed/exercises.json', import.meta.url))).map((e, i) => ({ ...e, id: String(i) }));
+const catalog = JSON.parse(readFileSync(new URL('./fixtures/exercises.json', import.meta.url))).map((e, i) => ({ ...e, id: String(i) }));
 
 test('detecta el mismo ejercicio escrito distinto', () => {
   assert.equal(nameSimilarity('Press de banca con mancuerna', 'press banca mancuernas'), 1);
