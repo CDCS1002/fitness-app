@@ -9,6 +9,7 @@ import { Progress } from './screens/Progress.jsx';
 import { Wellness } from './screens/Wellness.jsx';
 import { Emotions } from './screens/Emotions.jsx';
 import { today } from './lib/dates.js';
+import { syncCatalog } from './lib/catalog.js';
 
 const TABS = [
   { code: 'alimentacion', name: 'Alimentación', icon: 'M7 3v8a3 3 0 0 0 3 3v7M7 3v5M10 3v5M17 3c-2 0-3 3-3 6s1 4 3 4v8' },
@@ -39,6 +40,14 @@ export function App() {
 
   useEffect(() => {
     if (session) getGroups().then(setGroups).catch(() => {});
+  }, [session?.user?.id]);
+
+  // Catálogo de alimentos: se revisa en segundo plano unos segundos después de abrir,
+  // para no competir con la carga de la pantalla. Si no cambió, es una sola petición pequeña.
+  useEffect(() => {
+    if (!session) return undefined;
+    const t = setTimeout(() => { syncCatalog(supabase, session.user.id, import.meta.env.BASE_URL); }, 3000);
+    return () => clearTimeout(t);
   }, [session?.user?.id]);
 
   function go(code) {

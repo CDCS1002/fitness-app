@@ -103,3 +103,17 @@ dispositivo; si se pierde, la rutina se deduce de los registros (`src/lib/routin
 - Paso 2: áreas que influyen (trabajo, familia, pareja, dinero, salud, sueño, etc. y propias). Paso 3: nota y detalles opcionales (situación, pensamientos, cuerpo, qué hice).
 - Cada día muestra su contexto: sueño y fases, energía, entrenamiento y kcal frente al rango del plan.
 - Los reportes viven en **Progreso**: nutrición (el de antes) y psicología (período, distribución, palabras y áreas frecuentes, comparación de días agradables vs difíciles con ≥3 días de cada tipo, detalle por día con notas opcionales, PDF).
+
+## Catálogo de alimentos (carga automática)
+
+Desde la migración `0020_catalog.sql`, los alimentos nuevos ya no requieren correr SQL:
+
+1. Se agregan al JSON que corresponda en `supabase/seed/` (`label_foods.json` para etiquetas,
+   `brands_cr.json`, `meats_legumes.json`, `juices_soups.json`).
+2. `npm run build` genera `public/catalog.json` y `public/catalog-version.json` (scripts/build-catalog.mjs).
+3. Al abrir la app, 3 s después y en segundo plano, `syncCatalog` (src/lib/catalog.js) compara la versión con la
+   última sincronizada en el dispositivo. Si cambió: inserta los nuevos, enlaza los que ya existían por scripts
+   anteriores (por código de barras o nombre/marca/estado) y aplica correcciones solo a los que no editaste
+   (huella `catalog_hash`). Ante cualquier error lo reintenta en la siguiente apertura.
+
+Los cambios de estructura (tablas y columnas) siguen siendo migraciones SQL.
