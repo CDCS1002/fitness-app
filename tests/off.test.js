@@ -76,4 +76,8 @@ test('nombres que no son lácteo de la lista', () => {
   assert.equal(guessGroup([], { protein: 25, carbs: 2, fat: 30 }, 'Queso de leche de vaca'), 'grasa');
   assert.equal(guessGroup([], { protein: 7, carbs: 55, fat: 8 }, 'Dulce de leche'), 'carbohidrato');
   assert.equal(guessGroup([], { protein: 3.3, carbs: 4.8, fat: 1 }, 'Leche semidescremada'), 'lacteo');
+  // Bebidas lácteas con proteína que no dicen "leche" (Dos Pinos +Proteína Plus)
+  for (const name of ['+Proteína Plus Fresa', '+Proteína Plus Chocoalmendras', 'Proteina Plus Vainilla', 'Bebida láctea sabor fresa']) {
+    assert.equal(guessGroup([], { protein: 8, carbs: 7, fat: 1 }, name), 'lacteo', name);
+  }
 });

@@ -48,9 +48,10 @@ const CATEGORY_GROUPS = [
   [/nuts|seeds|oils|butters|avocado|dressings|mayonnaises/, 'grasa'],
 ];
 
-// Leches y yogures por el nombre, cuando Open Food Facts no trae categoría
+// Leches, yogures y bebidas lácteas por el nombre, cuando Open Food Facts no trae categoría
 // (no aplica a quesos, dulce de leche ni proteína en polvo).
-const DAIRY_NAME = /\b(leche|yogh?urt?|yogur|kefir|milk)\b/i;
+// Incluye las bebidas lácteas que no dicen "leche" en el nombre (p. ej. +Proteína Plus de Dos Pinos).
+const DAIRY_NAME = /\b(leche|yogh?urt?|yogur|kefir|milk|l[aá]cte[ao]s?|chocoleche|deslactosad[ao]|semidescremad[ao]|descremad[ao])\b|prote[ií]na\s*plus/i;
 const NOT_DAIRY_NAME = /queso|cheese|dulce de leche|cajeta|polvo|powder|whey|helado|ice cream/i;
 export const isDairyName = (name = '') => DAIRY_NAME.test(name) && !NOT_DAIRY_NAME.test(name);
 
