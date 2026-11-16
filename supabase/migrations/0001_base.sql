@@ -338,6 +338,7 @@ create table if not exists public.inbody_scans (
   user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
   day        date not null,
   metrics    jsonb not null,
+  refs       jsonb,                                   -- rangos de referencia de la persona
   notes      text,
   created_at timestamptz not null default now(),
   unique (user_id, day)

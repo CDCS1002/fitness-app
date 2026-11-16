@@ -307,8 +307,9 @@ export async function listInbody() {
   return check(await supabase.from('inbody_scans').select('*').order('day'));
 }
 
-export async function saveInbody({ id, day, metrics, notes }) {
+export async function saveInbody({ id, day, metrics, notes, refs }) {
   const row = { day, metrics, notes: notes || null };
+  if (refs) row.refs = refs; // rangos de referencia de la persona (columna desde 0003)
   return check(
     id
       ? await supabase.from('inbody_scans').update(row).eq('id', id).select().single()

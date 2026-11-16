@@ -29,7 +29,8 @@ export function InbodyForm({ scan, previous, onClose, onSaved }) {
     if (!Object.keys(metrics).length) return;
     setBusy(true);
     try {
-      await saveInbody({ id: scan?.id, day, metrics, notes: notes.trim() });
+      // Una medición nueva hereda los rangos de referencia de la anterior
+      await saveInbody({ id: scan?.id, day, metrics, notes: notes.trim(), refs: scan ? undefined : previous?.refs });
       onSaved();
     } catch (err) {
       alert(err.message.includes('duplicate') ? 'Ya hay una medición en esa fecha; edítala en vez de crear otra.' : err.message);

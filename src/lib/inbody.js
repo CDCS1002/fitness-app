@@ -1,36 +1,38 @@
 /**
- * Indicadores del InBody 380 (los mismos de la hoja InBody del Sheet).
+ * Indicadores del InBody (los mismos de la hoja InBody del Sheet).
  * better: 'up' si conviene que suba, 'down' si conviene que baje, null si es neutro.
  * key: clave en inbody_scans.metrics. main: aparece en el formulario rápido.
+ * Los rangos de referencia dependen de cada persona (sexo, talla, peso): se guardan
+ * por medición en inbody_scans.refs, no aquí.
  */
 export const INBODY_SECTIONS = [
   {
     name: 'Composición corporal',
     metrics: [
-      { key: 'weight', label: 'Peso', unit: 'kg', ref: '54,1 a 73,1', better: 'down', main: true },
+      { key: 'weight', label: 'Peso', unit: 'kg', better: 'down', main: true },
       { key: 'smm', label: 'Masa musculoesquelética', unit: 'kg', better: 'up', main: true },
-      { key: 'fat_mass', label: 'Masa grasa corporal', unit: 'kg', ref: '7,6 a 15,3', better: 'down', main: true },
-      { key: 'pbf', label: 'Porcentaje de grasa', unit: '%', ref: '10 a 20', better: 'down', main: true },
-      { key: 'tbw', label: 'Agua corporal total', unit: 'L', ref: '35,7 a 43,7', better: null },
-      { key: 'protein', label: 'Proteínas', unit: 'kg', ref: '9,5 a 11,7', better: 'up' },
-      { key: 'minerals', label: 'Minerales', unit: 'kg', ref: '3,30 a 4,04', better: null },
-      { key: 'ffm', label: 'Masa libre de grasa', unit: 'kg', ref: '48,6 a 59,4', better: 'up' },
+      { key: 'fat_mass', label: 'Masa grasa corporal', unit: 'kg', better: 'down', main: true },
+      { key: 'pbf', label: 'Porcentaje de grasa', unit: '%', better: 'down', main: true },
+      { key: 'tbw', label: 'Agua corporal total', unit: 'L', better: null },
+      { key: 'protein', label: 'Proteínas', unit: 'kg', better: 'up' },
+      { key: 'minerals', label: 'Minerales', unit: 'kg', better: null },
+      { key: 'ffm', label: 'Masa libre de grasa', unit: 'kg', better: 'up' },
     ],
   },
   {
     name: 'Obesidad',
     metrics: [
-      { key: 'bmi', label: 'IMC', unit: 'kg/m²', ref: '18,5 a 25,0', better: 'down' },
-      { key: 'visceral', label: 'Grasa visceral', unit: 'nivel', ref: 'menor a 10', better: 'down', main: true },
-      { key: 'whr', label: 'Relación cintura-cadera', unit: '', ref: '0,80 a 0,90', better: 'down', main: true },
-      { key: 'obesity_degree', label: 'Grado de obesidad', unit: '%', ref: '90 a 110', better: 'down' },
+      { key: 'bmi', label: 'IMC', unit: 'kg/m²', better: 'down' },
+      { key: 'visceral', label: 'Grasa visceral', unit: 'nivel', better: 'down', main: true },
+      { key: 'whr', label: 'Relación cintura-cadera', unit: '', better: 'down', main: true },
+      { key: 'obesity_degree', label: 'Grado de obesidad', unit: '%', better: 'down' },
     ],
   },
   {
     name: 'Metabolismo y puntuación',
     metrics: [
       { key: 'score', label: 'Puntuación InBody', unit: 'pts', better: 'up', main: true },
-      { key: 'bmr', label: 'Tasa metabólica basal', unit: 'kcal', ref: '1712 a 2010', better: 'up', main: true },
+      { key: 'bmr', label: 'Tasa metabólica basal', unit: 'kcal', better: 'up', main: true },
       { key: 'kcal_rec', label: 'Ingesta calórica recomendada', unit: 'kcal', better: null },
       { key: 'smi', label: 'IMME (índice de masa muscular)', unit: 'kg/m²', better: 'up' },
     ],

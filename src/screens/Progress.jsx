@@ -273,7 +273,7 @@ function InbodyCard({ scans, onAdd, onEdit }) {
                 return (
                   <div class="ib-row" key={m.key}>
                     <span>{m.label}{m.unit && <small class="muted"> {m.unit}</small>}</span>
-                    <span class="muted small">{m.ref || ''}</span>
+                    <span class="muted small">{last.refs?.[m.key] || ''}</span>
                     <span><b>{nf(v, 2)}</b> {c && c.delta !== 0 && <small class={`chg ${c.tone}`}>{sign(c.delta, 2)}</small>}</span>
                   </div>
                 );
